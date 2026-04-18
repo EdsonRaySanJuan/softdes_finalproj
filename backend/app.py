@@ -9,7 +9,7 @@ from routes.dashboard_routes import dashboard_bp
 from routes.order_routes import order_bp
 from routes.inventory_routes import inventory_bp
 from routes.auth_routes import auth_bp
-
+from routes.user_routes import user_bp
 
 app = Flask(__name__)
 
@@ -92,7 +92,7 @@ app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
 app.register_blueprint(order_bp, url_prefix='/api/orders')
 app.register_blueprint(inventory_bp, url_prefix='/api/inventory')
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
-
+app.register_blueprint(user_bp, url_prefix='/api/users')
 
 @app.route("/")
 def home():
