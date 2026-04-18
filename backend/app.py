@@ -4,13 +4,13 @@ from flask import Flask
 from flask_cors import CORS
 
 # Import route blueprints to handle modular system tasks 
-from routes.report_routes import report_bp
+#from routes.report_routes import report_bp
 from routes.dashboard_routes import dashboard_bp
-from routes.order_routes import order_bp
-from routes.inventory_routes import inventory_bp 
-from routes.auth_routes import auth_bp  
-from routes.user_routes import user_bp  
-from routes.rpa_routes import rpa_bp  # For monitoring automated workflows [cite: 21]
+#from routes.order_routes import order_bp
+#from routes.inventory_routes import inventory_bp 
+#from routes.auth_routes import auth_bp  
+#from routes.user_routes import user_bp  
+#from routes.rpa_routes import rpa_bp  # For monitoring automated workflows [cite: 21]
 
 app = Flask(__name__)
 
