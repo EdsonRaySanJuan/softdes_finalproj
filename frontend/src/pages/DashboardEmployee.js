@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import "../styles/dashboard.css";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../config";
 
 function DashboardEmployee() {
   const navigate = useNavigate();
 
-  // Stats States
   const [orders, setOrders] = useState([]);
   const [totalSales, setTotalSales] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
@@ -16,17 +16,14 @@ function DashboardEmployee() {
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        // Fetch real data from the backend
-        const statsRes = await fetch("http://127.0.0.1:5000/api/dashboard/stats");
+        const statsRes = await fetch(`${API_BASE_URL}/dashboard/stats`);
         const statsData = await statsRes.json();
 
-        // Safely map the backend variables to the React state
         setTotalSales(statsData.total_revenue || 0);
         setTotalOrders(statsData.total_orders || 0);
         setItemsSold(statsData.items_sold || 0);
         setLowStockCount(statsData.alerts || 0);
         setOrders(statsData.recent_orders || []);
-
       } catch (err) {
         console.error("Dashboard fetch error:", err);
         setOrders([]);
@@ -43,14 +40,9 @@ function DashboardEmployee() {
   return (
     <div className="app-body">
       <div className="app-shell">
-
-        {/* SIDEBAR */}
         <Sidebar role="Employee" />
 
-        {/* MAIN */}
         <main className="main-content">
-
-          {/* TOPBAR */}
           <header className="topbar">
             <div>
               <h2 className="page-title">Employee Dashboard</h2>
@@ -71,11 +63,10 @@ function DashboardEmployee() {
             </div>
           </header>
 
-          {/* KPI CARDS */}
           <section className="kpi-grid">
             <div className="kpi-card">
               <span className="kpi-label">Total Sales</span>
-              <span className="kpi-value" style={{ color: '#4ade80' }}>
+              <span className="kpi-value" style={{ color: "#4ade80" }}>
                 ₱ {totalSales.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -96,14 +87,10 @@ function DashboardEmployee() {
             </div>
           </section>
 
-          {/* LOWER SECTION */}
-          <section className="panel" style={{ marginTop: '20px' }}>
+          <section className="panel" style={{ marginTop: "20px" }}>
             <div className="panel-header">
               <h3>Recent Orders</h3>
-              <button 
-                className="btn-small" 
-                onClick={() => navigate("/orders")}
-              >
+              <button className="btn-small" onClick={() => navigate("/orders")}>
                 New Order
               </button>
             </div>
@@ -127,11 +114,11 @@ function DashboardEmployee() {
                 ) : (
                   orders.map((order, index) => (
                     <tr key={index}>
-                      <td style={{ fontWeight: 'bold' }}>{order.datetime}</td>
+                      <td style={{ fontWeight: "bold" }}>{order.datetime}</td>
                       <td>#{order.order_id}</td>
                       <td>{order.item_name}</td>
                       <td>{order.qty}</td>
-                      <td style={{ color: '#4ade80' }}>₱ {order.line_total.toFixed(2)}</td>
+                      <td style={{ color: "#4ade80" }}>₱ {order.line_total.toFixed(2)}</td>
                       <td><span className="badge badge-ok">{order.payment_method}</span></td>
                     </tr>
                   ))
@@ -139,7 +126,6 @@ function DashboardEmployee() {
               </tbody>
             </table>
           </section>
-
         </main>
       </div>
     </div>

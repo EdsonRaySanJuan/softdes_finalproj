@@ -1,25 +1,24 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
+import API_BASE_URL from "../config";
 import "../styles/settings.css";
 
 function Settings() {
   const [employees, setEmployees] = useState([]);
-  
-  // Form States
+
   const [fullName, setFullName] = useState("");
   const [userId, setUserId] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("Employee");
 
-  // Load employees on startup
   useEffect(() => {
     fetchEmployees();
   }, []);
 
   async function fetchEmployees() {
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/users/");
+      const res = await fetch(`${API_BASE_URL}/users/`);
       const data = await res.json();
       setEmployees(data);
     } catch (err) {
@@ -43,7 +42,7 @@ function Settings() {
     };
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/users/", {
+      const res = await fetch(`${API_BASE_URL}/users/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newEmployee)
@@ -51,9 +50,11 @@ function Settings() {
 
       if (res.ok) {
         alert("Employee added successfully!");
-        // Clear inputs
-        setFullName(""); setUserId(""); setUsername(""); setPassword("");
-        fetchEmployees(); // Refresh the table
+        setFullName("");
+        setUserId("");
+        setUsername("");
+        setPassword("");
+        fetchEmployees();
       } else {
         const errorData = await res.json();
         alert("Error: " + errorData.error);
@@ -77,7 +78,6 @@ function Settings() {
           </header>
 
           <section className="settings-layout">
-            {/* ADD EMPLOYEE PANEL */}
             <div className="settings-panel">
               <h3>Add Employee</h3>
               <div className="form-card">
@@ -110,7 +110,6 @@ function Settings() {
               </div>
             </div>
 
-            {/* REGISTERED EMPLOYEES PANEL */}
             <div className="settings-panel">
               <div className="panel-header">
                 <h3>Registered Employees</h3>
@@ -120,22 +119,26 @@ function Settings() {
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Username</th> {/* NEW COLUMN HEADER */}
+                    <th>Username</th>
                     <th>Role</th>
                     <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {employees.length === 0 ? (
-                    <tr><td colSpan="5" style={{textAlign:'center'}}>No employees found.</td></tr>
+                    <tr><td colSpan="5" style={{ textAlign: "center" }}>No employees found.</td></tr>
                   ) : (
                     employees.map((emp) => (
                       <tr key={emp.user_id}>
                         <td>{emp.user_id}</td>
                         <td>{emp.full_name}</td>
-                        <td>{emp.username}</td> {/* NEW COLUMN DATA */}
+                        <td>{emp.username}</td>
                         <td>{emp.role}</td>
-                        <td><span className={`badge badge-${emp.status === 'Active' ? 'ok' : 'disabled'}`}>{emp.status}</span></td>
+                        <td>
+                          <span className={`badge badge-${emp.status === "Active" ? "ok" : "disabled"}`}>
+                            {emp.status}
+                          </span>
+                        </td>
                       </tr>
                     ))
                   )}

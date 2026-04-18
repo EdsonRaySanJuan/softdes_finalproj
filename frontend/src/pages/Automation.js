@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
-import "../styles/dashboard.css"; // Reuse dashboard styles for panels/tables
+import API_BASE_URL from "../config";
+import "../styles/dashboard.css";
 
 function Automation() {
   const [logs, setLogs] = useState([]);
@@ -9,7 +10,7 @@ function Automation() {
   const fetchLogs = async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/rpa/logs");
+      const res = await fetch(`${API_BASE_URL}/rpa/logs`);
       const data = await res.json();
       setLogs(data);
     } catch (err) {
@@ -21,7 +22,6 @@ function Automation() {
 
   useEffect(() => {
     fetchLogs();
-    // Auto-refresh logs every 10 seconds to show "Live" activity
     const interval = setInterval(fetchLogs, 10000);
     return () => clearInterval(interval);
   }, []);
@@ -38,9 +38,9 @@ function Automation() {
               <p className="page-subtitle">Monitor bot activity and automated inventory tasks.</p>
             </div>
             <div className="topbar-right">
-              <button 
-                className="btn-ghost" 
-                onClick={fetchLogs} 
+              <button
+                className="btn-ghost"
+                onClick={fetchLogs}
                 disabled={isRefreshing}
               >
                 {isRefreshing ? "Refreshing..." : "Manual Refresh"}
@@ -61,7 +61,7 @@ function Automation() {
             </div>
           </section>
 
-          <section className="panel" style={{ marginTop: '20px' }}>
+          <section className="panel" style={{ marginTop: "20px" }}>
             <div className="panel-header">
               <h3>Live Bot Activity</h3>
               <span className="badge badge-ok">Bot Online</span>
@@ -79,18 +79,18 @@ function Automation() {
               <tbody>
                 {logs.length === 0 ? (
                   <tr>
-                    <td colSpan="4" style={{ textAlign: "center", padding: '30px', color: '#888' }}>
+                    <td colSpan="4" style={{ textAlign: "center", padding: "30px", color: "#888" }}>
                       No automation logs recorded yet. Run your rpa_agent.py to see activity.
                     </td>
                   </tr>
                 ) : (
                   logs.map((log) => (
                     <tr key={log.id}>
-                      <td style={{ color: '#A9B3AE' }}>{log.timestamp}</td>
+                      <td style={{ color: "#A9B3AE" }}>{log.timestamp}</td>
                       <td><strong>{log.bot_name}</strong></td>
                       <td>{log.task_description}</td>
                       <td>
-                        <span className={`badge badge-${log.status.toLowerCase() === 'completed' ? 'ok' : 'warning'}`}>
+                        <span className={`badge badge-${log.status.toLowerCase() === "completed" ? "ok" : "warning"}`}>
                           {log.status}
                         </span>
                       </td>
