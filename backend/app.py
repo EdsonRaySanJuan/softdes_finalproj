@@ -116,6 +116,69 @@ init_db()
 ensure_sales_table_schema()
 ensure_recipe_csv_placeholders()
 
+# Added
+
+init_db()
+ensure_sales_table_schema()
+ensure_recipe_csv_placeholders()
+
+# 🔥 ADD THIS BLOCK HERE
+def sync_inventory_from_csv():
+    inventory_path = os.path.join(DATA_DIR, "inventory.csv")
+
+    if not os.path.exists(inventory_path):
+        print("No inventory.csv found, skipping sync.")
+        return
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    with open(inventory_path, "r", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+
+        for row in reader:
+            item_name = row.get("item_name", "").strip()
+            if not item_name:
+                continue
+
+            if is_postgres():
+                cursor.execute("""
+                    INSERT INTO inventory (item_name, category, unit, current_stock, reorder_level, reorder_qty)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (item_name) DO UPDATE SET
+                        current_stock = EXCLUDED.current_stock,
+                        reorder_level = EXCLUDED.reorder_level,
+                        reorder_qty = EXCLUDED.reorder_qty
+                """, (
+                    item_name,
+                    row.get("category"),
+                    row.get("unit"),
+                    float(row.get("current_stock", 0)),
+                    float(row.get("reorder_level", 0)),
+                    float(row.get("reorder_qty", 0)),
+                ))
+            else:
+                cursor.execute("""
+                    INSERT OR REPLACE INTO inventory
+                    (item_name, category, unit, current_stock, reorder_level, reorder_qty)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    item_name,
+                    row.get("category"),
+                    row.get("unit"),
+                    float(row.get("current_stock", 0)),
+                    float(row.get("reorder_level", 0)),
+                    float(row.get("reorder_qty", 0)),
+                ))
+
+    conn.commit()
+    conn.close()
+
+# 🔥 RUN IT ON STARTUP
+sync_inventory_from_csv()
+
+# End
+
 app.register_blueprint(report_bp, url_prefix="/api/reports")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(order_bp, url_prefix="/api/orders")
