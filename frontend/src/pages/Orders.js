@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import "../styles/orders.css";
-import  API_BASE_URL  from "../config";
+import { API_BASE_URL } from "../config";
 
 const menuData = {
   lemonade: {
