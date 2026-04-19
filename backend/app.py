@@ -112,17 +112,20 @@ def ensure_recipe_csv_placeholders():
             ])
 
 
-init_db()
-ensure_sales_table_schema()
-ensure_recipe_csv_placeholders()
-
 # Added
-
 init_db()
 ensure_sales_table_schema()
 ensure_recipe_csv_placeholders()
 
-# 🔥 ADD THIS BLOCK HERE
+# 🔥 SAFE FLOAT (PREVENT CRASH)
+def safe_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+# 🔥 SYNC INVENTORY FROM CSV
 def sync_inventory_from_csv():
     inventory_path = os.path.join(DATA_DIR, "inventory.csv")
 
@@ -137,9 +140,15 @@ def sync_inventory_from_csv():
         reader = csv.DictReader(f)
 
         for row in reader:
-            item_name = row.get("item_name", "").strip()
-            if not item_name:
+            item_name = str(row.get("item_name", "")).strip()
+
+            # 🔥 SKIP EMPTY OR COMMENT ROWS
+            if not item_name or item_name.startswith("#"):
                 continue
+
+            current_stock = safe_float(row.get("current_stock"))
+            reorder_level = safe_float(row.get("reorder_level"))
+            reorder_qty = safe_float(row.get("reorder_qty"))
 
             if is_postgres():
                 cursor.execute("""
@@ -153,9 +162,9 @@ def sync_inventory_from_csv():
                     item_name,
                     row.get("category"),
                     row.get("unit"),
-                    float(row.get("current_stock", 0)),
-                    float(row.get("reorder_level", 0)),
-                    float(row.get("reorder_qty", 0)),
+                    current_stock,
+                    reorder_level,
+                    reorder_qty,
                 ))
             else:
                 cursor.execute("""
@@ -166,17 +175,18 @@ def sync_inventory_from_csv():
                     item_name,
                     row.get("category"),
                     row.get("unit"),
-                    float(row.get("current_stock", 0)),
-                    float(row.get("reorder_level", 0)),
-                    float(row.get("reorder_qty", 0)),
+                    current_stock,
+                    reorder_level,
+                    reorder_qty,
                 ))
 
     conn.commit()
     conn.close()
+    print("✅ Inventory synced from CSV")
 
-# 🔥 RUN IT ON STARTUP
+
+# 🔥 RUN AFTER TABLES ARE READY
 sync_inventory_from_csv()
-
 # End
 
 app.register_blueprint(report_bp, url_prefix="/api/reports")
