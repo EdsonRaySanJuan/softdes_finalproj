@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from db import init_db
@@ -14,20 +14,54 @@ from routes.rpa_routes import rpa_bp
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 
+ALLOWED_ORIGINS = [
+    "https://softdes-finalproj.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+
+def is_allowed_origin(origin):
+    if not origin:
+        return False
+
+    if origin in ALLOWED_ORIGINS:
+        return True
+
+    if origin.startswith("https://softdes-finalproj-") and origin.endswith(".vercel.app"):
+        return True
+
+    return False
+
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get("Origin")
+
+    if is_allowed_origin(origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+
+    return response
+
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        origin = request.headers.get("Origin")
+        response = jsonify({"ok": True})
+
+        if is_allowed_origin(origin):
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+
+        return response, 200
+
 CORS(
     app,
-    resources={
-        r"/api/*": {
-            "origins": [
-                "https://softdes-finalproj.vercel.app",
-                "http://localhost:3000",
-                "http://localhost:5173"
-            ]
-        }
-    },
-    supports_credentials=True,
-    allow_headers=["Content-Type", "Authorization"],
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
+    supports_credentials=True
 )
 
 init_db()
