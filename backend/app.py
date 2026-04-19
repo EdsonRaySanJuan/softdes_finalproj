@@ -77,41 +77,42 @@ CORS(
 )
 
 
-def ensure_sales_table():
+def ensure_sales_table_schema():
     conn = get_db_connection()
     cursor = conn.cursor()
 
     if is_postgres():
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS sales (
-                id SERIAL PRIMARY KEY,
-                order_id INTEGER NOT NULL,
-                timestamp TEXT NOT NULL,
-                item_name TEXT NOT NULL,
-                category TEXT,
-                size TEXT,
-                qty INTEGER NOT NULL,
-                unit_price REAL NOT NULL,
-                line_total REAL NOT NULL,
-                addons TEXT,
-                payment_method TEXT,
-                cash REAL,
-                change REAL,
-                table_no TEXT
+            CREATE TABLE IF NOT EXISTS public.sales (
+                id SERIAL PRIMARY KEY
             )
         """)
+
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS order_id INTEGER")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS timestamp TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS item_name TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS category TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS size TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS qty INTEGER")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS unit_price REAL")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS line_total REAL")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS addons TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS payment_method TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS cash REAL")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS change REAL")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS table_no TEXT")
     else:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS sales (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                order_id INTEGER NOT NULL,
-                timestamp TEXT NOT NULL,
-                item_name TEXT NOT NULL,
+                order_id INTEGER,
+                timestamp TEXT,
+                item_name TEXT,
                 category TEXT,
                 size TEXT,
-                qty INTEGER NOT NULL,
-                unit_price REAL NOT NULL,
-                line_total REAL NOT NULL,
+                qty INTEGER,
+                unit_price REAL,
+                line_total REAL,
                 addons TEXT,
                 payment_method TEXT,
                 cash REAL,
@@ -154,7 +155,7 @@ def ensure_recipe_csv_placeholders():
 
 
 init_db()
-ensure_sales_table()
+ensure_sales_table_schema()
 ensure_recipe_csv_placeholders()
 
 
@@ -215,6 +216,41 @@ def debug_tables():
         return jsonify({
             "using_postgres": is_postgres(),
             "tables": tables
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "error": str(e)
+        }), 500
+
+
+@app.route("/api/debug/sales-columns", methods=["GET"])
+def debug_sales_columns():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        if is_postgres():
+            cursor.execute("""
+                SELECT column_name, data_type
+                FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = 'sales'
+                ORDER BY ordinal_position
+            """)
+        else:
+            cursor.execute("PRAGMA table_info(sales)")
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        result = []
+        for row in rows:
+            result.append(row if isinstance(row, dict) else dict(row))
+
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "columns": result
         }), 200
 
     except Exception as e:
