@@ -26,41 +26,44 @@ def load_csv_rows(path):
         return list(csv.DictReader(f))
 
 
-def normalize_size(size_label):
-    size_map = {
-        "Regular": "regular",
-        "Grande": "grande",
-        "Venti": "venti",
-        "Grande 16oz": "grande",
-        "Venti 22oz": "venti",
-        "Small": "small",
-        "Medium": "medium",
-        "Large": "large",
+def normalize_size(size):
+    size = str(size).strip().lower()
+
+    mapping = {
+        "regular": "regular",
+        "medium": "grande",
+        "grande": "grande",
+        "large": "venti",
+        "venti": "venti"
     }
-    return size_map.get(str(size_label).strip(), normalize_text(size_label))
+
+    return mapping.get(size, size)
 
 
 def get_base_recipe_rows(menu_item, size_label):
-    normalized_menu_item = normalize_text(menu_item)
-    normalized_size = normalize_size(size_label)
+    normalized_menu_item = normalize_text(str(menu_item).strip())
+    normalized_size = normalize_size(str(size_label).strip())
+
     rows = load_csv_rows(DRINK_RECIPES_PATH)
 
     exact_matches = [
         row for row in rows
-        if normalize_text(row.get("menu_item")) == normalized_menu_item
-        and normalize_text(row.get("size")) == normalized_size
+        if normalize_text(str(row.get("menu_item", "")).strip()) == normalized_menu_item
+        and normalize_text(str(row.get("size", "")).strip()) == normalized_size
     ]
+
     if exact_matches:
         return exact_matches
 
     fallback_matches = [
         row for row in rows
         if (
-            normalize_text(row.get("menu_item")).startswith(normalized_menu_item)
-            or normalized_menu_item.startswith(normalize_text(row.get("menu_item")))
+            normalize_text(str(row.get("menu_item", "")).strip()).startswith(normalized_menu_item)
+            or normalized_menu_item.startswith(normalize_text(str(row.get("menu_item", "")).strip()))
         )
-        and normalize_text(row.get("size")) == normalized_size
+        and normalize_text(str(row.get("size", "")).strip()) == normalized_size
     ]
+
     return fallback_matches
 
 
@@ -391,6 +394,9 @@ def create_order():
             lines_written += 1
 
             recipe_rows = get_base_recipe_rows(name, size)
+            print("DEBUG ORDER:", name, size)
+            print("DEBUG RECIPES FOUND:", recipe_rows)
+
             if not recipe_rows:
                 inventory_warnings.append(
                     f"No base recipe found for item='{name}' size='{size}'. Sale saved, but base ingredients were not deducted."
@@ -402,6 +408,8 @@ def create_order():
 
                     if ingredient_name and qty_used > 0:
                         # 🔥 STOCK CHECK (NEW)
+                        ingredient_name = ingredient_name.strip()
+
                         ok, stock = check_ingredient_stock(cursor, ingredient_name, qty_used)
 
                         if not ok:
