@@ -3,8 +3,6 @@ import Sidebar from "../components/Sidebar";
 import "../styles/orders.css";
 import { API_BASE_URL } from "../config";
 
-const ADDON_PRICE = 10;
-
 const menuData = {
   lemonade: {
     label: "Lemonade",
@@ -186,7 +184,7 @@ const menuData = {
       { name: "Matcha Espresso", prices: { Grande: 45, Venti: 55 }, addons: ["Extra Shot", "Milk", "Whip Cream", "Salty Cream", "Coffee Jelly", "Oreo"] },
       { name: "Salty Cream Latte", prices: { Grande: 45, Venti: 55 }, addons: ["Extra Shot", "Milk", "Whip Cream", "Salty Cream", "Coffee Jelly", "Oreo"] },
       { name: "Sea Salt Latte", prices: { Grande: 45, Venti: 55 }, addons: ["Extra Shot", "Milk", "Whip Cream", "Salty Cream", "Coffee Jelly", "Oreo"] },
-      { name: "Barista's Drink", prices: { Grande: 45, Venti: 55 }, addons: ["Extra Shot", "Milk", "Whip Cream", "Salty Cream", "Coffee Jelly", "Oreo"] },
+      { name: "Barista’s Drink", prices: { Grande: 45, Venti: 55 }, addons: ["Extra Shot", "Milk", "Whip Cream", "Salty Cream", "Coffee Jelly", "Oreo"] },
       { name: "Dulce De Leche", prices: { Grande: 55, Venti: 65 }, addons: ["Extra Shot", "Milk", "Whip Cream", "Salty Cream", "Coffee Jelly", "Oreo"] },
       { name: "Velvet Cream Latte", prices: { Grande: 55, Venti: 65 }, addons: ["Extra Shot", "Milk", "Whip Cream", "Salty Cream", "Coffee Jelly", "Oreo"] },
       { name: "White Mocha Latte", prices: { Grande: 55, Venti: 65 }, addons: ["Extra Shot", "Milk", "Whip Cream", "Salty Cream", "Coffee Jelly", "Oreo"] },
@@ -219,24 +217,11 @@ export default function Orders() {
   const cashValue = Number(cash) || 0;
   const change = cashValue - total;
 
-  // ── MODAL COMPUTED VALUES ─────────────────────────────────────────────────
-  // Price of the currently selected size in the modal
-  const modalBasePrice = selectedItem && selectedSize
-    ? (selectedItem.prices[selectedSize] || 0)
-    : 0;
-
-  // Total addon cost in the modal (+₱10 each)
-  const modalAddonCost = selectedAddons.length * ADDON_PRICE;
-
-  // Total shown in the modal before adding to cart
-  const modalTotal = modalBasePrice + modalAddonCost;
-
   const openItemModal = (item) => {
     setSelectedItem({
       ...item,
       category: currentCategory.label,
     });
-    // FIX: Default to the first size key (e.g. "Grande", not empty string)
     const firstSize = Object.keys(item.prices)[0];
     setSelectedSize(firstSize);
     setSelectedAddons([]);
@@ -260,22 +245,16 @@ export default function Orders() {
     if (!selectedItem || !selectedSize) return;
 
     const unitPrice = selectedItem.prices[selectedSize];
-    // FIX: Include addon costs in unit_price and line_total
-    const addonCost = selectedAddons.length * ADDON_PRICE;
-    const totalUnitPrice = unitPrice + addonCost;
 
     const newItem = {
       category: selectedItem.category,
       item_name: selectedItem.name,
-      // FIX: Send the size key exactly as it appears in prices (e.g. "Grande", "Venti", "Regular")
-      // The backend normalize_size() will lowercase it correctly
       size: selectedSize,
       qty: 1,
-      unit_price: totalUnitPrice,
-      // FIX: Store addons as array of objects with name + price for payload
-      addons: selectedAddons.map((name) => ({ name, price: ADDON_PRICE })),
+      unit_price: unitPrice,
+      addons: selectedAddons,
       addons_text: selectedAddons.length ? selectedAddons.join(", ") : "None",
-      line_total: totalUnitPrice,
+      line_total: unitPrice,
     };
 
     setCart((prev) => [...prev, newItem]);
@@ -329,13 +308,10 @@ export default function Orders() {
         items: cart.map((item) => ({
           name: item.item_name,
           category: item.category,
-          // FIX: size is already the correct key ("Grande", "Venti", "Regular")
-          // backend normalize_size() handles lowercasing
           size: item.size,
           qty: item.qty,
           unitPrice: item.unit_price,
-          // FIX: addons are already stored as [{name, price}] objects
-          addons: item.addons,
+          addons: item.addons.map((addonName) => ({ name: addonName })),
         })),
         total,
         cash: cashValue,
@@ -361,7 +337,7 @@ export default function Orders() {
         return;
       }
 
-      let message = `Order #${data.order_id} processed successfully.\nTotal: ₱${total.toFixed(2)}\nCash: ₱${cashValue.toFixed(2)}\nChange: ₱${Math.max(0, change).toFixed(2)}`;
+      let message = `Order #${data.order_id} processed successfully.`;
 
       if (data.inventory_warnings && data.inventory_warnings.length > 0) {
         message += `\n\nInventory warnings:\n- ${data.inventory_warnings.join("\n- ")}`;
@@ -381,10 +357,8 @@ export default function Orders() {
     <div className="orders-page">
       <Sidebar />
       <div className="orders-content">
-        <h1>New Order</h1>
-        <p>Employees can create and complete cash orders.</p>
+        <h1>Orders</h1>
 
-        {/* ── CATEGORY TABS ── */}
         <div className="category-tabs">
           {Object.entries(menuData).map(([key, category]) => (
             <button
@@ -397,40 +371,19 @@ export default function Orders() {
           ))}
         </div>
 
-        {/* ── MENU GRID ── */}
-        <div className="menu-section">
-          <h2>{currentCategory.label}</h2>
-          <p className="category-desc">{currentCategory.description} &bull; {currentCategory.items.length} items</p>
-          <div className="menu-grid">
-            {currentCategory.items.map((item, index) => {
-              const prices = Object.values(item.prices);
-              const priceLabel =
-                prices.length === 1
-                  ? `₱${prices[0]}`
-                  : `₱${Math.min(...prices)} – ₱${Math.max(...prices)}`;
-              const sizes = Object.keys(item.prices).join(" / ");
-
-              return (
-                <div
-                  key={index}
-                  className="menu-card"
-                  onClick={() => openItemModal(item)}
-                >
-                  <h3>{item.name}</h3>
-                  <p className="price-label">{priceLabel}</p>
-                  <p className="size-label">{sizes}</p>
-                  {item.addons.length > 0 && (
-                    <p className="addon-label">+ {item.addons.length} add-ons available</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+        <div className="menu-grid">
+          {currentCategory.items.map((item, index) => (
+            <div key={index} className="menu-card">
+              <h3>{item.name}</h3>
+              <p>{currentCategory.description}</p>
+              <button onClick={() => openItemModal(item)}>Add Item</button>
+            </div>
+          ))}
         </div>
 
-        {/* ── CART ── */}
         <div className="cart-section">
           <h2>Cart</h2>
+
           {cart.length === 0 ? (
             <p>No items in cart.</p>
           ) : (
@@ -441,7 +394,7 @@ export default function Orders() {
                   <th>Size</th>
                   <th>Add-ons</th>
                   <th>Qty</th>
-                  <th>Unit Price</th>
+                  <th>Price</th>
                   <th>Total</th>
                   <th>Action</th>
                 </tr>
@@ -477,57 +430,45 @@ export default function Orders() {
               <option value="Takeout">Takeout</option>
             </select>
 
-            <label>Cash Received</label>
+            <label>Cash</label>
             <input
               type="number"
               value={cash}
               onChange={(e) => setCash(e.target.value)}
-              placeholder="Enter cash amount"
-              min={0}
+              placeholder="Enter cash"
             />
 
             <h4>Change: ₱{change >= 0 ? change.toFixed(2) : "0.00"}</h4>
 
             <div className="payment-actions">
-              <button onClick={clearCart}>Cancel Order</button>
-              <button
-                onClick={handlePayAndPrint}
-                disabled={isSubmitting || cart.length === 0 || cashValue < total}
-              >
+              <button onClick={clearCart}>Cancel</button>
+              <button onClick={handlePayAndPrint} disabled={isSubmitting}>
                 {isSubmitting ? "Processing..." : "Pay & Print Receipt"}
               </button>
             </div>
           </div>
         </div>
 
-        {/* ── ITEM MODAL ── */}
         {selectedItem && (
-          <div className="modal-overlay" onClick={closeItemModal}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <button className="modal-close" onClick={closeItemModal}>×</button>
+          <div className="modal-overlay">
+            <div className="modal">
               <h2>{selectedItem.name}</h2>
-              <p>Choose size and optional add-ons.</p>
 
-              {/* SIZE — toggle buttons matching the UI in screenshots */}
-              <div className="size-section">
-                <label>SIZE</label>
-                <div className="size-buttons">
-                  {Object.entries(selectedItem.prices).map(([size, price]) => (
-                    <button
-                      key={size}
-                      className={`size-btn ${selectedSize === size ? "active" : ""}`}
-                      onClick={() => setSelectedSize(size)}
-                    >
-                      {size === "Grande" ? "Grande 16oz" : size === "Venti" ? "Venti 22oz" : size} &nbsp;₱{price}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <label>Size</label>
+              <select
+                value={selectedSize}
+                onChange={(e) => setSelectedSize(e.target.value)}
+              >
+                {Object.entries(selectedItem.prices).map(([size, price]) => (
+                  <option key={size} value={size}>
+                    {size} - ₱{price}
+                  </option>
+                ))}
+              </select>
 
-              {/* ADD-ONS */}
               {selectedItem.addons.length > 0 && (
-                <div className="addons-section">
-                  <label>ADD-ONS</label>
+                <>
+                  <label>Add-ons</label>
                   <div className="addons-list">
                     {selectedItem.addons.map((addon, index) => (
                       <label key={index} className="addon-option">
@@ -536,29 +477,16 @@ export default function Orders() {
                           checked={selectedAddons.includes(addon)}
                           onChange={() => toggleAddon(addon)}
                         />
-                        <span>{addon}</span>
-                        <span className="addon-price">+₱{ADDON_PRICE}</span>
+                        {addon}
                       </label>
                     ))}
                   </div>
-                </div>
+                </>
               )}
 
-              {/* SELECTED TOTAL */}
-              <div className="modal-total">
-                <span>Selected total</span>
-                <span>₱{modalTotal}</span>
-              </div>
-
               <div className="modal-actions">
-                <button className="btn-cancel" onClick={closeItemModal}>Cancel</button>
-                <button
-                  className="btn-add"
-                  onClick={addToCart}
-                  disabled={!selectedSize}
-                >
-                  Add to cart
-                </button>
+                <button onClick={closeItemModal}>Close</button>
+                <button onClick={addToCart}>Add to Cart</button>
               </div>
             </div>
           </div>
