@@ -1,21 +1,23 @@
-import sqlite3
-import os
 from datetime import datetime
 from flask import Blueprint, request, jsonify
+from db import get_db_connection, is_postgres
 
 rpa_bp = Blueprint('rpa', __name__)
 
-def get_db_connection():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    db_path = os.path.join(base_dir, "data", "cafe.db")
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
 
-# 1. API for the Bot to send logs (POST)
+def rows_to_dicts(rows):
+    result = []
+    for row in rows:
+        if isinstance(row, dict):
+            result.append(row)
+        else:
+            result.append(dict(row))
+    return result
+
+
 @rpa_bp.route("/log", methods=["POST"])
 def add_log():
-    data = request.get_json()
+    data = request.get_json() or {}
     bot_name = data.get("bot_name", "Unknown Bot")
     task = data.get("task_description", "No description provided")
     status = data.get("status", "Info")
@@ -23,36 +25,34 @@ def add_log():
 
     try:
         conn = get_db_connection()
-        # Ensure the logs table exists
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS rpa_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp TEXT,
-                bot_name TEXT,
-                task_description TEXT,
-                status TEXT
-            )
-        ''')
-        
-        conn.execute('''
-            INSERT INTO rpa_logs (timestamp, bot_name, task_description, status)
-            VALUES (?, ?, ?, ?)
-        ''', (timestamp, bot_name, task, status))
-        
+        cursor = conn.cursor()
+
+        if is_postgres():
+            cursor.execute("""
+                INSERT INTO rpa_logs (timestamp, bot_name, task_description, status)
+                VALUES (%s, %s, %s, %s)
+            """, (timestamp, bot_name, task, status))
+        else:
+            cursor.execute("""
+                INSERT INTO rpa_logs (timestamp, bot_name, task_description, status)
+                VALUES (?, ?, ?, ?)
+            """, (timestamp, bot_name, task, status))
+
         conn.commit()
         conn.close()
         return jsonify({"success": True}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# 2. API for React to read the logs (GET)
+
 @rpa_bp.route("/logs", methods=["GET"])
 def get_logs():
     try:
         conn = get_db_connection()
-        logs = conn.execute("SELECT * FROM rpa_logs ORDER BY id DESC LIMIT 50").fetchall()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM rpa_logs ORDER BY id DESC LIMIT 50")
+        logs = rows_to_dicts(cursor.fetchall())
         conn.close()
-        return jsonify([dict(row) for row in logs])
-    except Exception as e:
-        # If table doesn't exist yet, return empty list
+        return jsonify(logs)
+    except Exception:
         return jsonify([])

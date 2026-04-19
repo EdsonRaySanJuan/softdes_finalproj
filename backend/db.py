@@ -20,11 +20,14 @@ def get_db_connection():
         if db_url.startswith("postgres://"):
             db_url = db_url.replace("postgres://", "postgresql://", 1)
 
-        conn = psycopg2.connect(db_url)
+        conn = psycopg2.connect(
+            db_url,
+            cursor_factory=psycopg2.extras.RealDictCursor
+        )
         return conn
 
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    db_path = os.path.join(basedir, "data", "cafe.db")
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    db_path = os.path.join(base_dir, "data", "cafe.db")
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
     conn = sqlite3.connect(db_path)
@@ -92,7 +95,6 @@ def init_db():
                 status TEXT
             )
         """)
-
     else:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS sales (

@@ -1,154 +1,228 @@
-import os
-import pandas as pd
 from flask import Blueprint, request, jsonify
+from db import get_db_connection, is_postgres
 
 report_bp = Blueprint('reports', __name__)
 
-# ================= BACKEND =================
-# LOAD CSV DATA WITH ABSOLUTE PATH AND DATE FIX
-def load_data():
-    # Set up absolute path to prevent "File Not Found" errors
-    basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    csv_path = os.path.join(basedir, "data", "monthly_Sales.csv")
-    
-    try:
-        df = pd.read_csv(csv_path)
-        df = df.dropna()
 
-        # 🔥 THE FIX: Added dayfirst=True and errors='coerce' to handle DD/MM/YYYY
-        df["datetime"] = pd.to_datetime(df["datetime"], dayfirst=True, errors='coerce')
-        
-        # Remove any rows where the date couldn't be parsed
-        df = df.dropna(subset=['datetime'])
-        
-        return df
-    except Exception as e:
-        print(f"Error loading report data: {e}")
-        return pd.DataFrame() # Return empty if file fails
+def dict_rows(rows):
+    output = []
+    for row in rows:
+        if isinstance(row, dict):
+            output.append(row)
+        else:
+            output.append(dict(row))
+    return output
 
-# ================= BACKEND =================
-# DEFAULT REPORT (KPI)
+
 @report_bp.route('/', methods=['GET'])
 def get_reports():
-    df = load_data()
-    if df.empty:
-        return jsonify({"total_sales": 0, "total_orders": 0, "avg_order": 0, "top_category": "N/A"})
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    total_sales = df["line_total"].sum()
-    total_orders = df["order_id"].nunique()
-    avg_order = total_sales / total_orders if total_orders else 0
-    
-    # Calculate top category
-    cat_counts = df["category"].value_counts()
-    top_category = cat_counts.idxmax() if not cat_counts.empty else "N/A"
+    cursor.execute("""
+        SELECT
+            COALESCE(SUM(line_total), 0) AS total_sales,
+            COALESCE(COUNT(DISTINCT order_id), 0) AS total_orders,
+            COALESCE(SUM(line_total) / NULLIF(COUNT(DISTINCT order_id), 0), 0) AS avg_order
+        FROM sales
+    """)
+    stats = cursor.fetchone()
+    stats = stats if isinstance(stats, dict) else dict(stats)
+
+    cursor.execute("""
+        SELECT category, COUNT(*) AS cnt
+        FROM sales
+        GROUP BY category
+        ORDER BY cnt DESC
+        LIMIT 1
+    """)
+    top = cursor.fetchone()
+    conn.close()
+
+    top_category = "N/A"
+    if top:
+        top = top if isinstance(top, dict) else dict(top)
+        top_category = top["category"]
 
     return jsonify({
-        "total_sales": float(total_sales),
-        "total_orders": int(total_orders),
-        "avg_order": float(avg_order),
+        "total_sales": float(stats["total_sales"] or 0),
+        "total_orders": int(stats["total_orders"] or 0),
+        "avg_order": float(stats["avg_order"] or 0),
         "top_category": top_category
     })
 
-# ================= BACKEND =================
-# DATE FILTER REPORT
+
 @report_bp.route('/range', methods=['GET'])
 def report_by_range():
     start = request.args.get("start")
     end = request.args.get("end")
 
-    df = load_data()
-    if df.empty:
-        return jsonify({"total_sales": 0, "total_orders": 0, "avg_order": 0, "top_category": "N/A"})
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    df["date_only"] = df["datetime"].dt.date
-
-    # Filter by range if dates are provided
     if start and end:
-        filtered = df[
-            (df["date_only"] >= pd.to_datetime(start).date()) &
-            (df["date_only"] <= pd.to_datetime(end).date())
-        ]
+        if is_postgres():
+            cursor.execute("""
+                SELECT
+                    COALESCE(SUM(line_total), 0) AS total_sales,
+                    COALESCE(COUNT(DISTINCT order_id), 0) AS total_orders,
+                    COALESCE(SUM(line_total) / NULLIF(COUNT(DISTINCT order_id), 0), 0) AS avg_order
+                FROM sales
+                WHERE DATE(datetime) BETWEEN %s AND %s
+            """, (start, end))
+        else:
+            cursor.execute("""
+                SELECT
+                    COALESCE(SUM(line_total), 0) AS total_sales,
+                    COALESCE(COUNT(DISTINCT order_id), 0) AS total_orders,
+                    COALESCE(SUM(line_total) / NULLIF(COUNT(DISTINCT order_id), 0), 0) AS avg_order
+                FROM sales
+                WHERE DATE(datetime) BETWEEN ? AND ?
+            """, (start, end))
+
+        if is_postgres():
+            cursor.execute("""
+                SELECT category, COUNT(*) AS cnt
+                FROM sales
+                WHERE DATE(datetime) BETWEEN %s AND %s
+                GROUP BY category
+                ORDER BY cnt DESC
+                LIMIT 1
+            """, (start, end))
+        else:
+            cursor.execute("""
+                SELECT category, COUNT(*) AS cnt
+                FROM sales
+                WHERE DATE(datetime) BETWEEN ? AND ?
+                GROUP BY category
+                ORDER BY cnt DESC
+                LIMIT 1
+            """, (start, end))
     else:
-        filtered = df
+        cursor.execute("""
+            SELECT
+                COALESCE(SUM(line_total), 0) AS total_sales,
+                COALESCE(COUNT(DISTINCT order_id), 0) AS total_orders,
+                COALESCE(SUM(line_total) / NULLIF(COUNT(DISTINCT order_id), 0), 0) AS avg_order
+            FROM sales
+        """)
+        cursor.execute("""
+            SELECT category, COUNT(*) AS cnt
+            FROM sales
+            GROUP BY category
+            ORDER BY cnt DESC
+            LIMIT 1
+        """)
 
-    total_sales = filtered["line_total"].sum()
-    total_orders = filtered["order_id"].nunique()
-    avg_order = total_sales / total_orders if total_orders else 0
+    stats = cursor.fetchone()
+    stats = stats if isinstance(stats, dict) else dict(stats)
 
-    cat_counts = filtered["category"].value_counts()
-    top_category = cat_counts.idxmax() if not cat_counts.empty else "N/A"
+    if start and end:
+        if is_postgres():
+            cursor.execute("""
+                SELECT category, COUNT(*) AS cnt
+                FROM sales
+                WHERE DATE(datetime) BETWEEN %s AND %s
+                GROUP BY category
+                ORDER BY cnt DESC
+                LIMIT 1
+            """, (start, end))
+        else:
+            cursor.execute("""
+                SELECT category, COUNT(*) AS cnt
+                FROM sales
+                WHERE DATE(datetime) BETWEEN ? AND ?
+                GROUP BY category
+                ORDER BY cnt DESC
+                LIMIT 1
+            """, (start, end))
+    else:
+        cursor.execute("""
+            SELECT category, COUNT(*) AS cnt
+            FROM sales
+            GROUP BY category
+            ORDER BY cnt DESC
+            LIMIT 1
+        """)
+
+    top = cursor.fetchone()
+    conn.close()
+
+    top_category = "N/A"
+    if top:
+        top = top if isinstance(top, dict) else dict(top)
+        top_category = top["category"]
 
     return jsonify({
-        "total_sales": float(total_sales),
-        "total_orders": int(total_orders),
-        "avg_order": float(avg_order),
+        "total_sales": float(stats["total_sales"] or 0),
+        "total_orders": int(stats["total_orders"] or 0),
+        "avg_order": float(stats["avg_order"] or 0),
         "top_category": top_category
     })
 
-# ================= BACKEND =================
-# DAILY SUMMARY (TABLE DATA)
+
 @report_bp.route('/daily', methods=['GET'])
 def daily_summary():
-    df = load_data()
-    if df.empty:
-        return jsonify([])
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    df["date_only"] = df["datetime"].dt.date
-    grouped = df.groupby("date_only")
+    cursor.execute("""
+        SELECT
+            DATE(datetime) AS date,
+            COUNT(DISTINCT order_id) AS orders,
+            COALESCE(SUM(line_total), 0) AS total_sales,
+            category
+        FROM sales
+        GROUP BY DATE(datetime), category
+        ORDER BY DATE(datetime) DESC
+    """)
 
-    result = []
-    for date, group in grouped:
-        total_sales = group["line_total"].sum()
-        total_orders = group["order_id"].nunique()
-        cat_counts = group["category"].value_counts()
-        top_cat = cat_counts.idxmax() if not cat_counts.empty else "N/A"
+    rows = dict_rows(cursor.fetchall())
+    conn.close()
 
-        result.append({
-            "date": str(date),
-            "orders": int(total_orders),
-            "total_sales": float(total_sales),
-            "top_category": top_cat,
-            "avg_handling": "02:15" # Placeholder for demo
-        })
+    daily = {}
+    for row in rows:
+        date = str(row["date"])
+        if date not in daily:
+            daily[date] = {
+                "date": date,
+                "orders": int(row["orders"]),
+                "total_sales": float(row["total_sales"]),
+                "top_category": row["category"],
+                "avg_handling": "02:15"
+            }
 
-    # Sort latest first
-    result = sorted(result, key=lambda x: x["date"], reverse=True)
-    return jsonify(result)
+    return jsonify(list(daily.values()))
 
-# ================= BACKEND =================
-# CHART DATA
+
 @report_bp.route('/chart', methods=['GET'])
 def chart_data():
     range_type = request.args.get("range", "7")
-    df = load_data()
-    if df.empty:
-        return jsonify([])
+    days_map = {"1": 1, "3": 3, "7": 7, "30": 30}
+    days = days_map.get(range_type, 7)
 
-    df["date_only"] = df["datetime"].dt.date
-    
-    # Use the max date in the dataset as "today" for historical CSV data
-    latest_date = df["date_only"].max()
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    if range_type == "1":
-        start = latest_date
-    elif range_type == "3":
-        start = latest_date - pd.Timedelta(days=3)
-    elif range_type == "7":
-        start = latest_date - pd.Timedelta(days=7)
-    elif range_type == "30":
-        start = latest_date - pd.Timedelta(days=30)
+    if is_postgres():
+        cursor.execute("""
+            SELECT DATE(datetime) AS date, COALESCE(SUM(line_total), 0) AS sales
+            FROM sales
+            WHERE DATE(datetime) >= CURRENT_DATE - INTERVAL '%s days'
+            GROUP BY DATE(datetime)
+            ORDER BY DATE(datetime)
+        """ % days)
     else:
-        start = latest_date - pd.Timedelta(days=7)
+        cursor.execute("""
+            SELECT DATE(datetime) AS date, COALESCE(SUM(line_total), 0) AS sales
+            FROM sales
+            WHERE DATE(datetime) >= DATE('now', ?)
+            GROUP BY DATE(datetime)
+            ORDER BY DATE(datetime)
+        """, (f'-{days} days',))
 
-    filtered = df[df["date_only"] >= start]
-    grouped = filtered.groupby("date_only")["line_total"].sum().reset_index()
+    rows = dict_rows(cursor.fetchall())
+    conn.close()
 
-    result = [
-        {
-            "date": str(row["date_only"]),
-            "sales": float(row["line_total"])
-        }
-        for _, row in grouped.iterrows()
-    ]
-
+    result = [{"date": str(r["date"]), "sales": float(r["sales"])} for r in rows]
     return jsonify(result)

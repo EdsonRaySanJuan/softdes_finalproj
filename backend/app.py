@@ -12,7 +12,6 @@ from routes.user_routes import user_bp
 from routes.rpa_routes import rpa_bp
 
 app = Flask(__name__)
-
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 
 CORS(

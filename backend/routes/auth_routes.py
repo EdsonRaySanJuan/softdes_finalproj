@@ -1,47 +1,54 @@
-import sqlite3
-import os
 import jwt
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from datetime import datetime, timedelta
 from functools import wraps
+from db import get_db_connection, is_postgres
 
 auth_bp = Blueprint('auth', __name__)
-SECRET_KEY = "your-cafe-pos-secret-key-2026"
 
-def get_db_connection():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    db_path = os.path.join(base_dir, "data", "cafe.db")
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
+
+def fetch_one_dict(cursor):
+    row = cursor.fetchone()
+    if not row:
+        return None
+    if isinstance(row, dict):
+        return row
+    return dict(row)
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
-    
-    # 1. Safely extract and TRIM spaces from inputs to prevent typos
+
     raw_id = data.get('username')
     raw_pw = data.get('password')
-    
-    # Convert to string and remove trailing/leading spaces
+
     login_id = str(raw_id).strip() if raw_id else ""
     password = str(raw_pw).strip() if raw_pw else ""
 
-    # 2. Print exactly what React is sending to the backend!
     print(f"\n=== LOGIN DEBUG ===")
     print(f"React sent ID: '{login_id}'")
     print(f"React sent PW: '{password}'")
     print(f"===================\n")
 
     conn = get_db_connection()
-    
-    # 3. Use LOWER() to make the username/ID case-insensitive
-    user = conn.execute('''
-        SELECT * FROM users 
-        WHERE (LOWER(username) = LOWER(?) OR LOWER(user_id) = LOWER(?)) 
-        AND password = ?
-    ''', (login_id, login_id, password)).fetchone()
-    
+    cursor = conn.cursor()
+
+    if is_postgres():
+        cursor.execute("""
+            SELECT * FROM users
+            WHERE (LOWER(username) = LOWER(%s) OR LOWER(user_id) = LOWER(%s))
+            AND password = %s
+            LIMIT 1
+        """, (login_id, login_id, password))
+    else:
+        cursor.execute("""
+            SELECT * FROM users
+            WHERE (LOWER(username) = LOWER(?) OR LOWER(user_id) = LOWER(?))
+            AND password = ?
+        """, (login_id, login_id, password))
+
+    user = fetch_one_dict(cursor)
     conn.close()
 
     if user:
@@ -53,7 +60,7 @@ def login():
             'username': user['username'],
             'role': user['role'],
             'exp': datetime.utcnow() + timedelta(hours=24)
-        }, SECRET_KEY, algorithm="HS256")
+        }, current_app.config["SECRET_KEY"], algorithm="HS256")
 
         return jsonify({
             'token': token,
@@ -61,12 +68,11 @@ def login():
             'username': user['username'],
             'full_name': user['full_name']
         })
-    
+
     print("[FAILED] Credentials did not match anything in the database.")
     return jsonify({'error': 'Invalid username or password'}), 401
 
 
-# --- THE SECURITY BOUNCER ---
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -76,8 +82,8 @@ def token_required(f):
         try:
             if token.startswith('Bearer '):
                 token = token.split(' ')[1]
-            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        except:
+            data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+        except Exception:
             return jsonify({'error': 'Invalid token'}), 401
         return f(data, *args, **kwargs)
     return decorated

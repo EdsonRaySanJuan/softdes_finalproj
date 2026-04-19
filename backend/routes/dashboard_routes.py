@@ -1,85 +1,77 @@
-import os
-import pandas as pd
 from flask import Blueprint, jsonify, request
 from datetime import timedelta, datetime
+from db import get_db_connection, is_postgres
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
-def load_data():
-    basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    csv_path = os.path.join(basedir, "data", "monthly_Sales.csv")
-    
-    try:
-        df = pd.read_csv(csv_path)
 
-        # 🔥 FIX 1: Handle BOTH date formats safely
-        df["datetime"] = pd.to_datetime(
-            df["datetime"],
-            format="mixed",   # 🔥 THIS IS THE FIX
-            errors="coerce"
-        )
-
-        df = df.dropna(subset=['datetime'])
-
-        # 🔥 NEW: ensure numeric fields are correct
-        df["line_total"] = pd.to_numeric(df["line_total"], errors="coerce").fillna(0)
-        df["qty"] = pd.to_numeric(df["qty"], errors="coerce").fillna(0)
-        df["order_id"] = pd.to_numeric(df["order_id"], errors="coerce")
-
-        return df
-
-    except Exception as e:
-        print(f"Error loading dashboard data: {e}")
-        return pd.DataFrame()
+def dict_rows(rows):
+    output = []
+    for row in rows:
+        if isinstance(row, dict):
+            output.append(row)
+        else:
+            output.append(dict(row))
+    return output
 
 
 @dashboard_bp.route("/stats", methods=["GET"])
 def get_stats():
     try:
         range_days = int(request.args.get("range", 1))
-        df = load_data()
-        print("===== LAST 5 ROWS FROM CSV =====")
-        print(df.tail(5))
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-        if df.empty:
-            return jsonify({
-                "total_revenue": 0,
-                "total_orders": 0,
-                "items_sold": 0,
-                "alerts": 0,
-                "recent_orders": []
-            })
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=range_days - 1)
 
-        df["date_only"] = df["datetime"].dt.date
+        if is_postgres():
+            cursor.execute("""
+                SELECT
+                    COALESCE(SUM(line_total), 0) AS total_revenue,
+                    COALESCE(COUNT(DISTINCT order_id), 0) AS total_orders,
+                    COALESCE(SUM(qty), 0) AS items_sold
+                FROM sales
+                WHERE DATE(datetime) >= %s
+            """, (start_date,))
+        else:
+            cursor.execute("""
+                SELECT
+                    COALESCE(SUM(line_total), 0) AS total_revenue,
+                    COALESCE(COUNT(DISTINCT order_id), 0) AS total_orders,
+                    COALESCE(SUM(qty), 0) AS items_sold
+                FROM sales
+                WHERE DATE(datetime) >= ?
+            """, (str(start_date),))
 
-        # 🔥 FIX 2: Smart date handling (won’t hide new orders)
-        today = datetime.now().date()
-        latest_csv_date = df["date_only"].max()
+        stats = cursor.fetchone()
+        stats = stats if isinstance(stats, dict) else dict(stats)
 
-        # Use whichever is newer
-        latest_date = max(today, latest_csv_date)
+        if is_postgres():
+            cursor.execute("""
+                SELECT datetime, order_id, item_name, qty, line_total, payment_method
+                FROM sales
+                WHERE DATE(datetime) >= %s
+                ORDER BY datetime DESC
+                LIMIT 5
+            """, (start_date,))
+        else:
+            cursor.execute("""
+                SELECT datetime, order_id, item_name, qty, line_total, payment_method
+                FROM sales
+                WHERE DATE(datetime) >= ?
+                ORDER BY datetime DESC
+                LIMIT 5
+            """, (str(start_date),))
 
-        start_date = latest_date - timedelta(days=range_days - 1)
-
-        filtered_df = df[df["date_only"] >= start_date]
-
-        # 🔥 SAFETY: if filter removes everything, fallback to all data
-        if filtered_df.empty:
-            filtered_df = df
-
-        # KPIs
-        total_revenue = filtered_df["line_total"].sum()
-        total_orders = filtered_df["order_id"].nunique()
-        items_sold = filtered_df["qty"].sum()
-
-        # Recent Orders
-        recent = filtered_df.sort_values(by="datetime", ascending=False).head(5)
+        recent = dict_rows(cursor.fetchall())
+        conn.close()
 
         recent_list = []
-        for _, row in recent.iterrows():
+        for row in recent:
             recent_list.append({
-                "datetime": row["datetime"].strftime("%Y-%m-%d %H:%M"),
-                "order_id": int(row["order_id"]) if not pd.isna(row["order_id"]) else 0,
+                "datetime": str(row["datetime"])[:16],
+                "order_id": int(row["order_id"]) if row["order_id"] is not None else 0,
                 "item_name": row["item_name"],
                 "qty": int(row["qty"]),
                 "line_total": float(row["line_total"]),
@@ -87,9 +79,9 @@ def get_stats():
             })
 
         return jsonify({
-            "total_revenue": float(total_revenue),
-            "total_orders": int(total_orders),
-            "items_sold": int(items_sold),
+            "total_revenue": float(stats["total_revenue"] or 0),
+            "total_orders": int(stats["total_orders"] or 0),
+            "items_sold": int(stats["items_sold"] or 0),
             "alerts": 0,
             "recent_orders": recent_list
         })

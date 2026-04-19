@@ -1,35 +1,33 @@
-import os
 import sqlite3
 from flask import Blueprint, jsonify, request
+from db import get_db_connection, is_postgres
 
 inventory_bp = Blueprint('inventory', __name__)
 
-def get_db_connection():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    db_path = os.path.join(base_dir, "data", "cafe.db")
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
 
-# ==========================================
-# GET: Fetch all inventory items
-# ==========================================
+def rows_to_dicts(rows):
+    result = []
+    for row in rows:
+        if isinstance(row, dict):
+            result.append(row)
+        else:
+            result.append(dict(row))
+    return result
+
+
 @inventory_bp.route("/", methods=["GET"])
 def get_inventory():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Sort by Category so items stay grouped together
         cursor.execute("SELECT * FROM inventory ORDER BY category ASC, item_name ASC")
-        items = [dict(row) for row in cursor.fetchall()]
+        items = rows_to_dicts(cursor.fetchall())
         conn.close()
         return jsonify(items)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ==========================================
-# POST: Add a new item
-# ==========================================
+
 @inventory_bp.route("/", methods=["POST"])
 def add_item():
     try:
@@ -45,7 +43,6 @@ def add_item():
         if not item_name or not category:
             return jsonify({"error": "Missing required fields"}), 400
 
-        # Calculate Status based on stock levels
         status = "Normal"
         if current_stock <= 0:
             status = "Out of Stock"
@@ -56,18 +53,24 @@ def add_item():
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        cursor.execute('''
-            INSERT INTO inventory (
-                item_name, category, unit, current_stock, 
-                reorder_level, reorder_qty, status, supplier
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (item_name, category, unit, current_stock, reorder_level, reorder_qty, status, supplier))
-        
+
+        if is_postgres():
+            cursor.execute("""
+                INSERT INTO inventory (
+                    item_name, category, unit, current_stock,
+                    reorder_level, reorder_qty, status, supplier
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (item_name, category, unit, current_stock, reorder_level, reorder_qty, status, supplier))
+        else:
+            cursor.execute("""
+                INSERT INTO inventory (
+                    item_name, category, unit, current_stock,
+                    reorder_level, reorder_qty, status, supplier
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (item_name, category, unit, current_stock, reorder_level, reorder_qty, status, supplier))
+
         conn.commit()
         conn.close()
-
         return jsonify({"success": True, "message": "Item added successfully!"}), 201
 
     except sqlite3.IntegrityError:
@@ -75,9 +78,7 @@ def add_item():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ==========================================
-# PUT: Update an existing item (Edit Mode)
-# ==========================================
+
 @inventory_bp.route("/<int:item_id>", methods=["PUT"])
 def update_item(item_id):
     try:
@@ -85,21 +86,25 @@ def update_item(item_id):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # 1. Fetch current item to ensure it exists
-        item = cursor.execute("SELECT * FROM inventory WHERE id = ?", (item_id,)).fetchone()
+        if is_postgres():
+            cursor.execute("SELECT * FROM inventory WHERE id = %s", (item_id,))
+        else:
+            cursor.execute("SELECT * FROM inventory WHERE id = ?", (item_id,))
+
+        item = cursor.fetchone()
         if not item:
             conn.close()
             return jsonify({"error": "Item not found"}), 404
 
-        # 2. Extract new values or fallback to current database values
+        item = item if isinstance(item, dict) else dict(item)
+
         new_name = data.get("item_name", item["item_name"])
         new_cat = data.get("category", item["category"])
         new_unit = data.get("unit", item["unit"])
         new_stock = int(data.get("current_stock", item["current_stock"]))
         new_reorder_lvl = int(data.get("reorder_level", item["reorder_level"]))
         new_supplier = data.get("supplier", item["supplier"])
-        
-        # 3. Recalculate Status based on edited values
+
         status = "Normal"
         if new_stock <= 0:
             status = "Out of Stock"
@@ -108,13 +113,20 @@ def update_item(item_id):
         elif new_stock <= new_reorder_lvl:
             status = "Low"
 
-        # 4. Perform the Update
-        cursor.execute('''
-            UPDATE inventory 
-            SET item_name = ?, category = ?, unit = ?, 
-                current_stock = ?, reorder_level = ?, supplier = ?, status = ?
-            WHERE id = ?
-        ''', (new_name, new_cat, new_unit, new_stock, new_reorder_lvl, new_supplier, status, item_id))
+        if is_postgres():
+            cursor.execute("""
+                UPDATE inventory
+                SET item_name = %s, category = %s, unit = %s,
+                    current_stock = %s, reorder_level = %s, supplier = %s, status = %s
+                WHERE id = %s
+            """, (new_name, new_cat, new_unit, new_stock, new_reorder_lvl, new_supplier, status, item_id))
+        else:
+            cursor.execute("""
+                UPDATE inventory
+                SET item_name = ?, category = ?, unit = ?,
+                    current_stock = ?, reorder_level = ?, supplier = ?, status = ?
+                WHERE id = ?
+            """, (new_name, new_cat, new_unit, new_stock, new_reorder_lvl, new_supplier, status, item_id))
 
         conn.commit()
         conn.close()
@@ -123,43 +135,48 @@ def update_item(item_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ==========================================
-# DELETE: Remove an item from inventory
-# ==========================================
+
 @inventory_bp.route("/<int:item_id>", methods=["DELETE"])
 def delete_item(item_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        item = cursor.execute("SELECT * FROM inventory WHERE id = ?", (item_id,)).fetchone()
+
+        if is_postgres():
+            cursor.execute("SELECT * FROM inventory WHERE id = %s", (item_id,))
+        else:
+            cursor.execute("SELECT * FROM inventory WHERE id = ?", (item_id,))
+
+        item = cursor.fetchone()
         if not item:
             conn.close()
             return jsonify({"error": "Item not found"}), 404
-            
-        cursor.execute("DELETE FROM inventory WHERE id = ?", (item_id,))
+
+        if is_postgres():
+            cursor.execute("DELETE FROM inventory WHERE id = %s", (item_id,))
+        else:
+            cursor.execute("DELETE FROM inventory WHERE id = ?", (item_id,))
+
         conn.commit()
         conn.close()
-        
         return jsonify({"success": True, "message": "Item deleted successfully!"}), 200
-        
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ==========================================
-# RPA: Fetch list of items needing reorder
-# ==========================================
+
 @inventory_bp.route("/reorder-list", methods=["GET"])
 def get_reorder_list():
     try:
         conn = get_db_connection()
-        # Find everything that is Critical, Low, or Out of Stock
-        items = conn.execute("""
-            SELECT item_name, supplier, reorder_qty, unit 
-            FROM inventory 
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT item_name, supplier, reorder_qty, unit
+            FROM inventory
             WHERE status IN ('Critical', 'Low', 'Out of Stock')
-        """).fetchall()
+        """)
+        items = rows_to_dicts(cursor.fetchall())
         conn.close()
-        return jsonify([dict(row) for row in items])
+        return jsonify(items)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
