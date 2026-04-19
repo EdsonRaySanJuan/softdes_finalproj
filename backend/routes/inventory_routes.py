@@ -412,7 +412,7 @@ def get_reorder_list():
         }), 500
     
 
-@app.route("/api/debug/seed-inventory", methods=["GET"])
+@inventory_bp.route("/debug/seed-inventory", methods=["GET"])
 def seed_inventory():
     try:
         addon_path = os.path.join(DATA_DIR, "addon_recipes.csv")
