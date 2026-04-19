@@ -42,7 +42,7 @@ def normalize_size(size):
 
 def get_base_recipe_rows(menu_item, size_label):
     normalized_menu_item = normalize_text(str(menu_item).strip())
-    normalized_size = normalize_size(str(size_label).strip())
+    normalized_size = normalize_size(str(size_label or "regular").strip())
 
     rows = load_csv_rows(DRINK_RECIPES_PATH)
 
@@ -330,7 +330,7 @@ def create_order():
         for item in items:
             name = str(item.get("name", "")).strip()
             category = str(item.get("category", "")).strip()
-            size = str(item.get("size", "")).strip()
+            size = str(item.get("size") or "regular").strip()
             qty = int(item.get("qty", 1) or 1)
             unit_price = float(item.get("unitPrice", 0) or 0)
             addons_list = item.get("addons", []) or []
