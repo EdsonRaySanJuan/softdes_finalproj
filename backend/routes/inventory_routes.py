@@ -412,8 +412,94 @@ def get_reorder_list():
         }), 500
     
 
+# ===============================
+# 🔥 ADDED: FIXED SEED INVENTORY
+# ===============================
 @inventory_bp.route("/debug/seed-inventory", methods=["GET"])
 def seed_inventory():
+    try:
+        addon_path = os.path.join(DATA_DIR, "addon_recipes.csv")
+
+        if not os.path.exists(addon_path):
+            return jsonify({
+                "success": False,
+                "error": f"CSV not found at {addon_path}"
+            }), 404
+
+        with open(addon_path, "r", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            rows = list(reader)
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        processed = 0
+
+        for row in rows:
+            item_name = str(row.get("ingredient_name", "")).strip()
+            if not item_name:
+                continue
+
+            unit = str(row.get("unit", "pcs")).strip()
+
+            # 🔥 MAIN FIX: use stocks column
+            current_stock = int(float(row.get("stocks", 1000)))
+
+            reorder_level = int(current_stock * 0.2)
+            reorder_qty = int(current_stock * 0.3)
+
+            category = "general"
+            supplier = "auto"
+
+            status = compute_status(current_stock, reorder_level)
+
+            if is_postgres():
+                cursor.execute("""
+                    INSERT INTO inventory (
+                        item_name, category, unit, current_stock,
+                        reorder_level, reorder_qty, status, supplier
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (item_name)
+                    DO UPDATE SET
+                        current_stock = EXCLUDED.current_stock,
+                        reorder_level = EXCLUDED.reorder_level,
+                        reorder_qty = EXCLUDED.reorder_qty,
+                        status = EXCLUDED.status
+                """, (
+                    item_name, category, unit,
+                    current_stock, reorder_level,
+                    reorder_qty, status, supplier
+                ))
+            else:
+                cursor.execute("""
+                    INSERT OR REPLACE INTO inventory (
+                        item_name, category, unit, current_stock,
+                        reorder_level, reorder_qty, status, supplier
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    item_name, category, unit,
+                    current_stock, reorder_level,
+                    reorder_qty, status, supplier
+                ))
+
+            processed += 1
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "message": "Inventory seeded successfully",
+            "processed": processed
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
     try:
         addon_path = os.path.join(DATA_DIR, "addon_recipes.csv")
 
