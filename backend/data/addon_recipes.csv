@@ -1,17 +1,17 @@
 addon_name,ingredient_name,qty_used,unit,stocks
+
 Yakult,Yakult,1,pc,1000
 Dutchmill,Dutchmill,1,pc,1000
-Nata,Nata,50,g,1000
+Nata,Nata de Coco,50,g,1000
 Chia Seeds,Chia Seeds,10,g,1000
-Premium Upgrade,Premium  Upgrade,20,ml,1000
-Tea Bag,Tea Bag,1,pc,1000
-Salty Cream,Salty Cream,40,ml,1000
-Cream Cheese,Cream Cheese Foam,40,ml,1000
-Oreo,Oreo ,20,g,1000
+Premium Upgrade,Sugar Syrup,20,ml,1000
+Tea Bag,Black Tea Leaves,5,g,1000
+Salty Cream,Whipping Cream,40,ml,1000
+Cream Cheese,Cream Cheese,40,ml,1000
+Oreo,Oreo,20,g,1000
 Coffee Jelly,Coffee Jelly,50,g,1000
-Boba Pearl,Boba Pearl,50,g,1000
+Boba Pearl,Boba Pearls,50,g,1000
 Sugar Jelly,Sugar Jelly,50,g,1000
-Lemon Grass Oolong Upgrade,Lemon Grass Oolong Upgrade,15,ml,1000
 Espresso Shot,Espresso Shot,1,shot,1000
 Milk,Milk,30,ml,1000
-Whip Cream,Whip Cream,30,g,1000
+Whip Cream,Whipping Cream,30,g,1000
