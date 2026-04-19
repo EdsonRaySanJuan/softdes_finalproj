@@ -1,183 +1,818 @@
 menu_category,menu_item,size,ingredient_name,qty_used,unit,recipe_type
-Lemonade,Lemonade (Regular),Regular,Price,40,PHP,price
-Lemonade,Green Apple Lemonade,Regular,Price,50,PHP,price
-Lemonade,Strawberry Lemonade,Regular,Price,50,PHP,price
-Lemonade,Blueberry Lemonade,Regular,Price,50,PHP,price
-Lemonade,Peach Lemonade,Regular,Price,50,PHP,price
-Lemonade,Lychee Lemonade,Regular,Price,50,PHP,price
-Lemonade,Strawberry Lemon,Regular,Price,60,PHP,price
-Lemonade,Blue Lemonade,Regular,Price,60,PHP,price
-Lemonade,Red Fizz Lemonade,Regular,Price,60,PHP,price
-Lemonade,Cucumber Lemonade,Regular,Price,60,PHP,price
-Lemonade,Honey Ginger,Regular,Price,65,PHP,price
-Yogurt Smoothies,Strawberry,Grande,Price,60,PHP,price
-Yogurt Smoothies,Strawberry,Venti,Price,70,PHP,price
-Yogurt Smoothies,Blueberry,Grande,Price,60,PHP,price
-Yogurt Smoothies,Blueberry,Venti,Price,70,PHP,price
-Yogurt Smoothies,Passion Fruit,Grande,Price,60,PHP,price
-Yogurt Smoothies,Passion Fruit,Venti,Price,70,PHP,price
-Yogurt Smoothies,Biscoff,Grande,Price,70,PHP,price
-Yogurt Smoothies,Biscoff,Venti,Price,80,PHP,price
-Fruit Soda,Green Apple,Grande,Price,58,PHP,price
-Fruit Soda,Green Apple,Venti,Price,68,PHP,price
-Fruit Soda,Strawberry,Grande,Price,58,PHP,price
-Fruit Soda,Strawberry,Venti,Price,68,PHP,price
-Fruit Soda,Blueberry,Grande,Price,58,PHP,price
-Fruit Soda,Blueberry,Venti,Price,68,PHP,price
-Fruit Soda,Peach,Grande,Price,58,PHP,price
-Fruit Soda,Peach,Venti,Price,68,PHP,price
-Fruit Soda,Lychee,Grande,Price,58,PHP,price
-Fruit Soda,Lychee,Venti,Price,68,PHP,price
-Fruit Soda,Lemon,Grande,Price,58,PHP,price
-Fruit Soda,Lemon,Venti,Price,68,PHP,price
-Fruit Soda,Ginger Ale,Grande,Price,58,PHP,price
-Fruit Soda,Ginger Ale,Venti,Price,68,PHP,price
-Hot Coffee,Americano,Regular,Price,58,PHP,price
-Hot Coffee,Cà Phê Español,Regular,Price,58,PHP,price
-Hot Coffee,Hot Latte,Regular,Price,58,PHP,price
-Hot Coffee,Caramel Macchiato,Regular,Price,58,PHP,price
-Hot Coffee,Salted Caramel,Regular,Price,58,PHP,price
-Hot Coffee,Matcha Espresso,Regular,Price,58,PHP,price
-Hot Tea,Green Tea,Regular,Price,50,PHP,price
-Hot Tea,Spearmint Tea,Regular,Price,50,PHP,price
-Hot Tea,Chamomile Tea,Regular,Price,50,PHP,price
-Hot Tea,Hibiscus Tea,Regular,Price,50,PHP,price
-Hot Tea,Butterfly Pea Tea,Regular,Price,50,PHP,price
-Milk Tea,Matcha,Grande,Price,38,PHP,price
-Milk Tea,Matcha,Venti,Price,48,PHP,price
-Milk Tea,Wintermelon,Grande,Price,38,PHP,price
-Milk Tea,Wintermelon,Venti,Price,48,PHP,price
-Milk Tea,Oreo,Grande,Price,38,PHP,price
-Milk Tea,Oreo,Venti,Price,48,PHP,price
-Milk Tea,Red Velvet,Grande,Price,38,PHP,price
-Milk Tea,Red Velvet,Venti,Price,48,PHP,price
-Milk Tea,Dark Choco,Grande,Price,38,PHP,price
-Milk Tea,Dark Choco,Venti,Price,48,PHP,price
-Milk Tea,Sugar Jelly Milk Tea,Grande,Price,38,PHP,price
-Milk Tea,Sugar Jelly Milk Tea,Venti,Price,48,PHP,price
-Oolong Tea,Lychee,Grande,Price,45,PHP,price
-Oolong Tea,Lychee,Venti,Price,55,PHP,price
-Oolong Tea,Peach,Grande,Price,45,PHP,price
-Oolong Tea,Peach,Venti,Price,55,PHP,price
-Oolong Tea,Lemon,Grande,Price,45,PHP,price
-Oolong Tea,Lemon,Venti,Price,55,PHP,price
-Oolong Tea,Calamansi,Grande,Price,45,PHP,price
-Oolong Tea,Calamansi,Venti,Price,55,PHP,price
-Oolong Tea,Passion Fruit,Grande,Price,45,PHP,price
-Oolong Tea,Passion Fruit,Venti,Price,55,PHP,price
-Green Tea,Strawberry Lychee,Grande,Price,55,PHP,price
-Green Tea,Strawberry Lychee,Venti,Price,65,PHP,price
-Green Tea,Strawberry,Grande,Price,55,PHP,price
-Green Tea,Strawberry,Venti,Price,65,PHP,price
-Green Tea,Lychee,Grande,Price,55,PHP,price
-Green Tea,Lychee,Venti,Price,65,PHP,price
-Green Tea,Peach,Grande,Price,55,PHP,price
-Green Tea,Peach,Venti,Price,65,PHP,price
-Green Tea,Calamansi,Grande,Price,55,PHP,price
-Green Tea,Calamansi,Venti,Price,65,PHP,price
-Green Tea,Passion Fruit,Grande,Price,55,PHP,price
-Green Tea,Passion Fruit,Venti,Price,65,PHP,price
-Non-Coffee,Strawberry Milk,Grande,Price,38,PHP,price
-Non-Coffee,Strawberry Milk,Venti,Price,48,PHP,price
-Non-Coffee,Blueberry Milk,Grande,Price,38,PHP,price
-Non-Coffee,Blueberry Milk,Venti,Price,48,PHP,price
-Non-Coffee,Oreo Milk,Grande,Price,38,PHP,price
-Non-Coffee,Oreo Milk,Venti,Price,48,PHP,price
-Non-Coffee,Swissmiss,Grande,Price,38,PHP,price
-Non-Coffee,Swissmiss,Venti,Price,48,PHP,price
-Non-Coffee,Strawberry Oreo,Grande,Price,38,PHP,price
-Non-Coffee,Strawberry Oreo,Venti,Price,48,PHP,price
-Non-Coffee,Strawberry Matcha,Grande,Price,38,PHP,price
-Non-Coffee,Strawberry Matcha,Venti,Price,48,PHP,price
-Non-Coffee,Ube Milk,Grande,Price,38,PHP,price
-Non-Coffee,Ube Milk,Venti,Price,48,PHP,price
-Non-Coffee,Sea Salt Cocoa,Grande,Price,65,PHP,price
-Non-Coffee,Sea Salt Cocoa,Venti,Price,75,PHP,price
-Non-Coffee,Choco Salt Cocoa,Grande,Price,65,PHP,price
-Non-Coffee,Choco Salt Cocoa,Venti,Price,75,PHP,price
-Non-Coffee,Choco-Berry,Grande,Price,65,PHP,price
-Non-Coffee,Choco-Berry,Venti,Price,75,PHP,price
-Non-Coffee,Milky Biscoff,Grande,Price,65,PHP,price
-Non-Coffee,Milky Biscoff,Venti,Price,75,PHP,price
-Non-Coffee,Nutella,Grande,Price,65,PHP,price
-Non-Coffee,Nutella,Venti,Price,75,PHP,price
-Frappuccino,Macchiato,Grande,Price,75,PHP,price
-Frappuccino,Macchiato,Venti,Price,85,PHP,price
-Frappuccino,Caramel,Grande,Price,75,PHP,price
-Frappuccino,Caramel,Venti,Price,85,PHP,price
-Frappuccino,Dark Mocha,Grande,Price,75,PHP,price
-Frappuccino,Dark Mocha,Venti,Price,85,PHP,price
-Frappuccino,Coffee Crumble,Grande,Price,75,PHP,price
-Frappuccino,Coffee Crumble,Venti,Price,85,PHP,price
-Frappuccino,Coffee Fudge,Grande,Price,75,PHP,price
-Frappuccino,Coffee Fudge,Venti,Price,85,PHP,price
-Frappuccino,Almond Fudge,Grande,Price,75,PHP,price
-Frappuccino,Almond Fudge,Venti,Price,85,PHP,price
-Frappuccino,Mocha Jelly,Grande,Price,75,PHP,price
-Frappuccino,Mocha Jelly,Venti,Price,85,PHP,price
-Frappuccino,Coffee Jelly,Grande,Price,75,PHP,price
-Frappuccino,Coffee Jelly,Venti,Price,85,PHP,price
-Frappuccino,Nutella,Grande,Price,75,PHP,price
-Frappuccino,Nutella,Venti,Price,85,PHP,price
-Non-Coffee Frappe,Cookies & Cream,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Cookies & Cream,Venti,Price,80,PHP,price
-Non-Coffee Frappe,Milo Cream,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Milo Cream,Venti,Price,80,PHP,price
-Non-Coffee Frappe,Strawberry,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Strawberry,Venti,Price,80,PHP,price
-Non-Coffee Frappe,Blueberry,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Blueberry,Venti,Price,80,PHP,price
-Non-Coffee Frappe,Purple Yam,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Purple Yam,Venti,Price,80,PHP,price
-Non-Coffee Frappe,Matcha Oreo,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Matcha Oreo,Venti,Price,80,PHP,price
-Non-Coffee Frappe,Matcha Strawberry,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Matcha Strawberry,Venti,Price,80,PHP,price
-Non-Coffee Frappe,Ube Oreo,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Ube Oreo,Venti,Price,80,PHP,price
-Non-Coffee Frappe,Chocolate Chip Cream,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Chocolate Chip Cream,Venti,Price,80,PHP,price
-Non-Coffee Frappe,Nutella Cream,Grande,Price,70,PHP,price
-Non-Coffee Frappe,Nutella Cream,Venti,Price,80,PHP,price
-Cà Phê Espresso,Americano,Grande,Price,38,PHP,price
-Cà Phê Espresso,Americano,Venti,Price,48,PHP,price
-Cà Phê Espresso,Cà Phê Español,Grande,Price,38,PHP,price
-Cà Phê Espresso,Cà Phê Español,Venti,Price,48,PHP,price
-Cà Phê Espresso,Iced Latte,Grande,Price,38,PHP,price
-Cà Phê Espresso,Iced Latte,Venti,Price,48,PHP,price
-Cà Phê Espresso,Matcha Latte,Grande,Price,38,PHP,price
-Cà Phê Espresso,Matcha Latte,Venti,Price,48,PHP,price
-Cà Phê Espresso,Salted Caramel,Grande,Price,38,PHP,price
-Cà Phê Espresso,Salted Caramel,Venti,Price,48,PHP,price
-Cà Phê Espresso,Oreo Latte,Grande,Price,38,PHP,price
-Cà Phê Espresso,Oreo Latte,Venti,Price,48,PHP,price
-Cà Phê Espresso,Dark Mocha Latte,Grande,Price,38,PHP,price
-Cà Phê Espresso,Dark Mocha Latte,Venti,Price,48,PHP,price
-Premium,Strawberry Latte,Grande,Price,45,PHP,price
-Premium,Strawberry Latte,Venti,Price,55,PHP,price
-Premium,Matcha Espresso,Grande,Price,45,PHP,price
-Premium,Matcha Espresso,Venti,Price,55,PHP,price
-Premium,Salty Cream Latte,Grande,Price,45,PHP,price
-Premium,Salty Cream Latte,Venti,Price,55,PHP,price
-Premium,Sea Salt Latte,Grande,Price,45,PHP,price
-Premium,Sea Salt Latte,Venti,Price,55,PHP,price
-Premium,Barista's Drink,Grande,Price,45,PHP,price
-Premium,Barista's Drink,Venti,Price,55,PHP,price
-Premium,Dulce De Leche,Grande,Price,55,PHP,price
-Premium,Dulce De Leche,Venti,Price,65,PHP,price
-Premium,Velvet Cream Latte,Grande,Price,55,PHP,price
-Premium,Velvet Cream Latte,Venti,Price,65,PHP,price
-Premium,White Mocha Latte,Grande,Price,55,PHP,price
-Premium,White Mocha Latte,Venti,Price,65,PHP,price
-Premium,Vanilla Sweet Cream,Grande,Price,55,PHP,price
-Premium,Vanilla Sweet Cream,Venti,Price,65,PHP,price
-Premium,Toffee Nut Latte,Grande,Price,55,PHP,price
-Premium,Toffee Nut Latte,Venti,Price,65,PHP,price
-Premium,Almond Latte,Grande,Price,55,PHP,price
-Premium,Almond Latte,Venti,Price,65,PHP,price
-Premium,Peanut Butter Latte,Grande,Price,70,PHP,price
-Premium,Peanut Butter Latte,Venti,Price,80,PHP,price
-Premium,Biscoff Latte,Grande,Price,70,PHP,price
-Premium,Biscoff Latte,Venti,Price,80,PHP,price
-Premium,Nutella Latte,Grande,Price,70,PHP,price
-Premium,Nutella Latte,Venti,Price,80,PHP,price
+lemonade,Lemonade (Regular),Regular,lemon_base,1,unit,base
+lemonade,Lemonade (Regular),Regular,water,300,ml,base
+lemonade,Lemonade (Regular),Regular,ice,1,cup,base
+
+lemonade,Green Apple Lemonade,Regular,lemon_base,1,unit,base
+lemonade,Green Apple Lemonade,Regular,green_apple_syrup,30,ml,flavor
+lemonade,Green Apple Lemonade,Regular,water,270,ml,base
+lemonade,Green Apple Lemonade,Regular,ice,1,cup,base
+
+lemonade,Strawberry Lemonade,Regular,lemon_base,1,unit,base
+lemonade,Strawberry Lemonade,Regular,strawberry_syrup,30,ml,flavor
+lemonade,Strawberry Lemonade,Regular,water,270,ml,base
+lemonade,Strawberry Lemonade,Regular,ice,1,cup,base
+
+lemonade,Blueberry Lemonade,Regular,lemon_base,1,unit,base
+lemonade,Blueberry Lemonade,Regular,blueberry_syrup,30,ml,flavor
+lemonade,Blueberry Lemonade,Regular,water,270,ml,base
+lemonade,Blueberry Lemonade,Regular,ice,1,cup,base
+
+lemonade,Peach Lemonade,Regular,lemon_base,1,unit,base
+lemonade,Peach Lemonade,Regular,peach_syrup,30,ml,flavor
+lemonade,Peach Lemonade,Regular,water,270,ml,base
+lemonade,Peach Lemonade,Regular,ice,1,cup,base
+
+lemonade,Lychee Lemonade,Regular,lemon_base,1,unit,base
+lemonade,Lychee Lemonade,Regular,lychee_syrup,30,ml,flavor
+lemonade,Lychee Lemonade,Regular,water,270,ml,base
+lemonade,Lychee Lemonade,Regular,ice,1,cup,base
+
+lemonade,Strawberry Lemon,Regular,lemon_base,1,unit,base
+lemonade,Strawberry Lemon,Regular,strawberry_syrup,40,ml,flavor
+lemonade,Strawberry Lemon,Regular,water,260,ml,base
+lemonade,Strawberry Lemon,Regular,ice,1,cup,base
+
+lemonade,Blue Lemonade,Regular,lemon_base,1,unit,base
+lemonade,Blue Lemonade,Regular,blue_syrup,40,ml,flavor
+lemonade,Blue Lemonade,Regular,water,260,ml,base
+lemonade,Blue Lemonade,Regular,ice,1,cup,base
+
+lemonade,Red Fizz Lemonade,Regular,lemon_base,1,unit,base
+lemonade,Red Fizz Lemonade,Regular,red_syrup,40,ml,flavor
+lemonade,Red Fizz Lemonade,Regular,soda_water,260,ml,base
+lemonade,Red Fizz Lemonade,Regular,ice,1,cup,base
+
+lemonade,Cucumber Lemonade,Regular,lemon_base,1,unit,base
+lemonade,Cucumber Lemonade,Regular,cucumber_extract,30,ml,flavor
+lemonade,Cucumber Lemonade,Regular,water,270,ml,base
+lemonade,Cucumber Lemonade,Regular,ice,1,cup,base
+
+lemonade,Honey Ginger,Regular,lemon_base,1,unit,base
+lemonade,Honey Ginger,Regular,honey,20,ml,flavor
+lemonade,Honey Ginger,Regular,ginger_extract,10,ml,flavor
+lemonade,Honey Ginger,Regular,water,270,ml,base
+lemonade,Honey Ginger,Regular,ice,1,cup,base
+
+========================================================
+yogurtSmoothies,Strawberry,Grande,yogurt_base,1,unit,base
+yogurtSmoothies,Strawberry,Grande,strawberry_syrup,30,ml,flavor
+yogurtSmoothies,Strawberry,Grande,ice,1,cup,base
+
+yogurtSmoothies,Strawberry,Venti,yogurt_base,1,unit,base
+yogurtSmoothies,Strawberry,Venti,strawberry_syrup,40,ml,flavor
+yogurtSmoothies,Strawberry,Venti,ice,1.5,cup,base
+
+yogurtSmoothies,Blueberry,Grande,yogurt_base,1,unit,base
+yogurtSmoothies,Blueberry,Grande,blueberry_syrup,30,ml,flavor
+yogurtSmoothies,Blueberry,Grande,ice,1,cup,base
+
+yogurtSmoothies,Blueberry,Venti,yogurt_base,1,unit,base
+yogurtSmoothies,Blueberry,Venti,blueberry_syrup,40,ml,flavor
+yogurtSmoothies,Blueberry,Venti,ice,1.5,cup,base
+
+yogurtSmoothies,Passion Fruit,Grande,yogurt_base,1,unit,base
+yogurtSmoothies,Passion Fruit,Grande,passionfruit_syrup,30,ml,flavor
+yogurtSmoothies,Passion Fruit,Grande,ice,1,cup,base
+
+yogurtSmoothies,Passion Fruit,Venti,yogurt_base,1,unit,base
+yogurtSmoothies,Passion Fruit,Venti,passionfruit_syrup,40,ml,flavor
+yogurtSmoothies,Passion Fruit,Venti,ice,1.5,cup,base
+
+yogurtSmoothies,Biscoff,Grande,yogurt_base,1,unit,base
+yogurtSmoothies,Biscoff,Grande,biscoff_spread,20,grams,flavor
+yogurtSmoothies,Biscoff,Grande,ice,1,cup,base
+
+yogurtSmoothies,Biscoff,Venti,yogurt_base,1,unit,base
+yogurtSmoothies,Biscoff,Venti,biscoff_spread,30,grams,flavor
+yogurtSmoothies,Biscoff,Venti,ice,1.5,cup,base
+========================================================================
+fruitSoda,Green Apple,Grande,soda_water,300,ml,base
+fruitSoda,Green Apple,Grande,green_apple_syrup,30,ml,flavor
+fruitSoda,Green Apple,Grande,ice,1,cup,base
+
+fruitSoda,Green Apple,Venti,soda_water,400,ml,base
+fruitSoda,Green Apple,Venti,green_apple_syrup,40,ml,flavor
+fruitSoda,Green Apple,Venti,ice,1.5,cup,base
+
+fruitSoda,Strawberry,Grande,soda_water,300,ml,base
+fruitSoda,Strawberry,Grande,strawberry_syrup,30,ml,flavor
+fruitSoda,Strawberry,Grande,ice,1,cup,base
+
+fruitSoda,Strawberry,Venti,soda_water,400,ml,base
+fruitSoda,Strawberry,Venti,strawberry_syrup,40,ml,flavor
+fruitSoda,Strawberry,Venti,ice,1.5,cup,base
+
+fruitSoda,Blueberry,Grande,soda_water,300,ml,base
+fruitSoda,Blueberry,Grande,blueberry_syrup,30,ml,flavor
+fruitSoda,Blueberry,Grande,ice,1,cup,base
+
+fruitSoda,Blueberry,Venti,soda_water,400,ml,base
+fruitSoda,Blueberry,Venti,blueberry_syrup,40,ml,flavor
+fruitSoda,Blueberry,Venti,ice,1.5,cup,base
+
+fruitSoda,Peach,Grande,soda_water,300,ml,base
+fruitSoda,Peach,Grande,peach_syrup,30,ml,flavor
+fruitSoda,Peach,Grande,ice,1,cup,base
+
+fruitSoda,Peach,Venti,soda_water,400,ml,base
+fruitSoda,Peach,Venti,peach_syrup,40,ml,flavor
+fruitSoda,Peach,Venti,ice,1.5,cup,base
+
+fruitSoda,Lychee,Grande,soda_water,300,ml,base
+fruitSoda,Lychee,Grande,lychee_syrup,30,ml,flavor
+fruitSoda,Lychee,Grande,ice,1,cup,base
+
+fruitSoda,Lychee,Venti,soda_water,400,ml,base
+fruitSoda,Lychee,Venti,lychee_syrup,40,ml,flavor
+fruitSoda,Lychee,Venti,ice,1.5,cup,base
+
+fruitSoda,Lemon,Grande,soda_water,300,ml,base
+fruitSoda,Lemon,Grande,lemon_base,1,unit,flavor
+fruitSoda,Lemon,Grande,ice,1,cup,base
+
+fruitSoda,Lemon,Venti,soda_water,400,ml,base
+fruitSoda,Lemon,Venti,lemon_base,1,unit,flavor
+fruitSoda,Lemon,Venti,ice,1.5,cup,base
+
+fruitSoda,Ginger Ale,Grande,soda_water,300,ml,base
+fruitSoda,Ginger Ale,Grande,ginger_extract,15,ml,flavor
+fruitSoda,Ginger Ale,Grande,ice,1,cup,base
+
+fruitSoda,Ginger Ale,Venti,soda_water,400,ml,base
+fruitSoda,Ginger Ale,Venti,ginger_extract,20,ml,flavor
+fruitSoda,Ginger Ale,Venti,ice,1.5,cup,base
+========================================================================
+hotCoffee,Americano,Regular,espresso_shot,2,shot,base
+hotCoffee,Americano,Regular,hot_water,250,ml,base
+
+hotCoffee,Cà Phê Español,Regular,espresso_shot,2,shot,base
+hotCoffee,Cà Phê Español,Regular,condensed_milk,30,ml,flavor
+hotCoffee,Cà Phê Español,Regular,hot_water,200,ml,base
+
+hotCoffee,Hot Latte,Regular,espresso_shot,2,shot,base
+hotCoffee,Hot Latte,Regular,milk,200,ml,base
+
+hotCoffee,Caramel Macchiato,Regular,espresso_shot,2,shot,base
+hotCoffee,Caramel Macchiato,Regular,milk,180,ml,base
+hotCoffee,Caramel Macchiato,Regular,caramel_syrup,20,ml,flavor
+
+hotCoffee,Salted Caramel,Regular,espresso_shot,2,shot,base
+hotCoffee,Salted Caramel,Regular,milk,180,ml,base
+hotCoffee,Salted Caramel,Regular,caramel_syrup,20,ml,flavor
+hotCoffee,Salted Caramel,Regular,salt_foam,30,ml,flavor
+
+hotCoffee,Matcha Espresso,Regular,espresso_shot,1,shot,base
+hotCoffee,Matcha Espresso,Regular,matcha_powder,10,grams,flavor
+hotCoffee,Matcha Espresso,Regular,milk,180,ml,base
+============================================================
+hotTea,Green Tea,Regular,tea_bag_green,1,bag,base
+hotTea,Green Tea,Regular,hot_water,250,ml,base
+
+hotTea,Spearmint Tea,Regular,tea_bag_spearmint,1,bag,base
+hotTea,Spearmint Tea,Regular,hot_water,250,ml,base
+
+hotTea,Chamomile Tea,Regular,tea_bag_chamomile,1,bag,base
+hotTea,Chamomile Tea,Regular,hot_water,250,ml,base
+
+hotTea,Hibiscus Tea,Regular,tea_bag_hibiscus,1,bag,base
+hotTea,Hibiscus Tea,Regular,hot_water,250,ml,base
+
+hotTea,Butterfly Pea Tea,Regular,tea_bag_butterfly_pea,1,bag,base
+hotTea,Butterfly Pea Tea,Regular,hot_water,250,ml,base
+==============================================================
+milkTea,Matcha,Grande,tea_base,1,unit,base
+milkTea,Matcha,Grande,milk,150,ml,base
+milkTea,Matcha,Grande,matcha_powder,10,grams,flavor
+milkTea,Matcha,Grande,ice,1,cup,base
+
+milkTea,Matcha,Venti,tea_base,1,unit,base
+milkTea,Matcha,Venti,milk,200,ml,base
+milkTea,Matcha,Venti,matcha_powder,15,grams,flavor
+milkTea,Matcha,Venti,ice,1.5,cup,base
+
+milkTea,Wintermelon,Grande,tea_base,1,unit,base
+milkTea,Wintermelon,Grande,milk,150,ml,base
+milkTea,Wintermelon,Grande,wintermelon_syrup,30,ml,flavor
+milkTea,Wintermelon,Grande,ice,1,cup,base
+
+milkTea,Wintermelon,Venti,tea_base,1,unit,base
+milkTea,Wintermelon,Venti,milk,200,ml,base
+milkTea,Wintermelon,Venti,wintermelon_syrup,40,ml,flavor
+milkTea,Wintermelon,Venti,ice,1.5,cup,base
+
+milkTea,Oreo,Grande,tea_base,1,unit,base
+milkTea,Oreo,Grande,milk,150,ml,base
+milkTea,Oreo,Grande,oreo_crush,20,grams,flavor
+milkTea,Oreo,Grande,ice,1,cup,base
+
+milkTea,Oreo,Venti,tea_base,1,unit,base
+milkTea,Oreo,Venti,milk,200,ml,base
+milkTea,Oreo,Venti,oreo_crush,30,grams,flavor
+milkTea,Oreo,Venti,ice,1.5,cup,base
+
+milkTea,Red Velvet,Grande,tea_base,1,unit,base
+milkTea,Red Velvet,Grande,milk,150,ml,base
+milkTea,Red Velvet,Grande,red_velvet_powder,20,grams,flavor
+milkTea,Red Velvet,Grande,ice,1,cup,base
+
+milkTea,Red Velvet,Venti,tea_base,1,unit,base
+milkTea,Red Velvet,Venti,milk,200,ml,base
+milkTea,Red Velvet,Venti,red_velvet_powder,30,grams,flavor
+milkTea,Red Velvet,Venti,ice,1.5,cup,base
+
+milkTea,Dark Choco,Grande,tea_base,1,unit,base
+milkTea,Dark Choco,Grande,milk,150,ml,base
+milkTea,Dark Choco,Grande,dark_choco_powder,20,grams,flavor
+milkTea,Dark Choco,Grande,ice,1,cup,base
+
+milkTea,Dark Choco,Venti,tea_base,1,unit,base
+milkTea,Dark Choco,Venti,milk,200,ml,base
+milkTea,Dark Choco,Venti,dark_choco_powder,30,grams,flavor
+milkTea,Dark Choco,Venti,ice,1.5,cup,base
+
+milkTea,Sugar Jelly Milk Tea,Grande,tea_base,1,unit,base
+milkTea,Sugar Jelly Milk Tea,Grande,milk,150,ml,base
+milkTea,Sugar Jelly Milk Tea,Grande,ice,1,cup,base
+
+milkTea,Sugar Jelly Milk Tea,Venti,tea_base,1,unit,base
+milkTea,Sugar Jelly Milk Tea,Venti,milk,200,ml,base
+milkTea,Sugar Jelly Milk Tea,Venti,ice,1.5,cup,base
+===============================================================
+oolongTea,Lychee,Grande,oolong_tea_base,1,unit,base
+oolongTea,Lychee,Grande,lychee_syrup,30,ml,flavor
+oolongTea,Lychee,Grande,ice,1,cup,base
+
+oolongTea,Lychee,Venti,oolong_tea_base,1,unit,base
+oolongTea,Lychee,Venti,lychee_syrup,40,ml,flavor
+oolongTea,Lychee,Venti,ice,1.5,cup,base
+
+oolongTea,Peach,Grande,oolong_tea_base,1,unit,base
+oolongTea,Peach,Grande,peach_syrup,30,ml,flavor
+oolongTea,Peach,Grande,ice,1,cup,base
+
+oolongTea,Peach,Venti,oolong_tea_base,1,unit,base
+oolongTea,Peach,Venti,peach_syrup,40,ml,flavor
+oolongTea,Peach,Venti,ice,1.5,cup,base
+
+oolongTea,Lemon,Grande,oolong_tea_base,1,unit,base
+oolongTea,Lemon,Grande,lemon_base,1,unit,flavor
+oolongTea,Lemon,Grande,ice,1,cup,base
+
+oolongTea,Lemon,Venti,oolong_tea_base,1,unit,base
+oolongTea,Lemon,Venti,lemon_base,1,unit,flavor
+oolongTea,Lemon,Venti,ice,1.5,cup,base
+
+oolongTea,Calamansi,Grande,oolong_tea_base,1,unit,base
+oolongTea,Calamansi,Grande,calamansi_extract,20,ml,flavor
+oolongTea,Calamansi,Grande,ice,1,cup,base
+
+oolongTea,Calamansi,Venti,oolong_tea_base,1,unit,base
+oolongTea,Calamansi,Venti,calamansi_extract,30,ml,flavor
+oolongTea,Calamansi,Venti,ice,1.5,cup,base
+
+oolongTea,Passion Fruit,Grande,oolong_tea_base,1,unit,base
+oolongTea,Passion Fruit,Grande,passionfruit_syrup,30,ml,flavor
+oolongTea,Passion Fruit,Grande,ice,1,cup,base
+
+oolongTea,Passion Fruit,Venti,oolong_tea_base,1,unit,base
+oolongTea,Passion Fruit,Venti,passionfruit_syrup,40,ml,flavor
+oolongTea,Passion Fruit,Venti,ice,1.5,cup,base
+======================================================
+greenTea,Strawberry Lychee,Grande,green_tea_base,1,unit,base
+greenTea,Strawberry Lychee,Grande,strawberry_syrup,20,ml,flavor
+greenTea,Strawberry Lychee,Grande,lychee_syrup,20,ml,flavor
+greenTea,Strawberry Lychee,Grande,ice,1,cup,base
+
+greenTea,Strawberry Lychee,Venti,green_tea_base,1,unit,base
+greenTea,Strawberry Lychee,Venti,strawberry_syrup,30,ml,flavor
+greenTea,Strawberry Lychee,Venti,lychee_syrup,30,ml,flavor
+greenTea,Strawberry Lychee,Venti,ice,1.5,cup,base
+
+greenTea,Strawberry,Grande,green_tea_base,1,unit,base
+greenTea,Strawberry,Grande,strawberry_syrup,30,ml,flavor
+greenTea,Strawberry,Grande,ice,1,cup,base
+
+greenTea,Strawberry,Venti,green_tea_base,1,unit,base
+greenTea,Strawberry,Venti,strawberry_syrup,40,ml,flavor
+greenTea,Strawberry,Venti,ice,1.5,cup,base
+
+greenTea,Lychee,Grande,green_tea_base,1,unit,base
+greenTea,Lychee,Grande,lychee_syrup,30,ml,flavor
+greenTea,Lychee,Grande,ice,1,cup,base
+
+greenTea,Lychee,Venti,green_tea_base,1,unit,base
+greenTea,Lychee,Venti,lychee_syrup,40,ml,flavor
+greenTea,Lychee,Venti,ice,1.5,cup,base
+
+greenTea,Peach,Grande,green_tea_base,1,unit,base
+greenTea,Peach,Grande,peach_syrup,30,ml,flavor
+greenTea,Peach,Grande,ice,1,cup,base
+
+greenTea,Peach,Venti,green_tea_base,1,unit,base
+greenTea,Peach,Venti,peach_syrup,40,ml,flavor
+greenTea,Peach,Venti,ice,1.5,cup,base
+
+greenTea,Calamansi,Grande,green_tea_base,1,unit,base
+greenTea,Calamansi,Grande,calamansi_extract,20,ml,flavor
+greenTea,Calamansi,Grande,ice,1,cup,base
+
+greenTea,Calamansi,Venti,green_tea_base,1,unit,base
+greenTea,Calamansi,Venti,calamansi_extract,30,ml,flavor
+greenTea,Calamansi,Venti,ice,1.5,cup,base
+
+greenTea,Passion Fruit,Grande,green_tea_base,1,unit,base
+greenTea,Passion Fruit,Grande,passionfruit_syrup,30,ml,flavor
+greenTea,Passion Fruit,Grande,ice,1,cup,base
+
+greenTea,Passion Fruit,Venti,green_tea_base,1,unit,base
+greenTea,Passion Fruit,Venti,passionfruit_syrup,40,ml,flavor
+greenTea,Passion Fruit,Venti,ice,1.5,cup,base
+==========================================================
+nonCoffee,Strawberry Milk,Grande,milk,180,ml,base
+nonCoffee,Strawberry Milk,Grande,strawberry_syrup,30,ml,flavor
+nonCoffee,Strawberry Milk,Grande,ice,1,cup,base
+
+nonCoffee,Strawberry Milk,Venti,milk,220,ml,base
+nonCoffee,Strawberry Milk,Venti,strawberry_syrup,40,ml,flavor
+nonCoffee,Strawberry Milk,Venti,ice,1.5,cup,base
+
+nonCoffee,Blueberry Milk,Grande,milk,180,ml,base
+nonCoffee,Blueberry Milk,Grande,blueberry_syrup,30,ml,flavor
+nonCoffee,Blueberry Milk,Grande,ice,1,cup,base
+
+nonCoffee,Blueberry Milk,Venti,milk,220,ml,base
+nonCoffee,Blueberry Milk,Venti,blueberry_syrup,40,ml,flavor
+nonCoffee,Blueberry Milk,Venti,ice,1.5,cup,base
+
+nonCoffee,Oreo Milk,Grande,milk,180,ml,base
+nonCoffee,Oreo Milk,Grande,oreo_crush,25,grams,flavor
+nonCoffee,Oreo Milk,Grande,ice,1,cup,base
+
+nonCoffee,Oreo Milk,Venti,milk,220,ml,base
+nonCoffee,Oreo Milk,Venti,oreo_crush,35,grams,flavor
+nonCoffee,Oreo Milk,Venti,ice,1.5,cup,base
+
+nonCoffee,Swissmiss,Grande,milk,180,ml,base
+nonCoffee,Swissmiss,Grande,choco_powder,20,grams,flavor
+nonCoffee,Swissmiss,Grande,ice,1,cup,base
+
+nonCoffee,Swissmiss,Venti,milk,220,ml,base
+nonCoffee,Swissmiss,Venti,choco_powder,30,grams,flavor
+nonCoffee,Swissmiss,Venti,ice,1.5,cup,base
+
+nonCoffee,Strawberry Oreo,Grande,milk,180,ml,base
+nonCoffee,Strawberry Oreo,Grande,strawberry_syrup,20,ml,flavor
+nonCoffee,Strawberry Oreo,Grande,oreo_crush,15,grams,flavor
+nonCoffee,Strawberry Oreo,Grande,ice,1,cup,base
+
+nonCoffee,Strawberry Oreo,Venti,milk,220,ml,base
+nonCoffee,Strawberry Oreo,Venti,strawberry_syrup,30,ml,flavor
+nonCoffee,Strawberry Oreo,Venti,oreo_crush,25,grams,flavor
+nonCoffee,Strawberry Oreo,Venti,ice,1.5,cup,base
+
+nonCoffee,Strawberry Matcha,Grande,milk,180,ml,base
+nonCoffee,Strawberry Matcha,Grande,strawberry_syrup,20,ml,flavor
+nonCoffee,Strawberry Matcha,Grande,matcha_powder,10,grams,flavor
+nonCoffee,Strawberry Matcha,Grande,ice,1,cup,base
+
+nonCoffee,Strawberry Matcha,Venti,milk,220,ml,base
+nonCoffee,Strawberry Matcha,Venti,strawberry_syrup,30,ml,flavor
+nonCoffee,Strawberry Matcha,Venti,matcha_powder,15,grams,flavor
+nonCoffee,Strawberry Matcha,Venti,ice,1.5,cup,base
+
+nonCoffee,Ube Milk,Grande,milk,180,ml,base
+nonCoffee,Ube Milk,Grande,ube_powder,20,grams,flavor
+nonCoffee,Ube Milk,Grande,ice,1,cup,base
+
+nonCoffee,Ube Milk,Venti,milk,220,ml,base
+nonCoffee,Ube Milk,Venti,ube_powder,30,grams,flavor
+nonCoffee,Ube Milk,Venti,ice,1.5,cup,base
+
+nonCoffee,Sea Salt Cocoa,Grande,milk,180,ml,base
+nonCoffee,Sea Salt Cocoa,Grande,dark_choco_powder,25,grams,flavor
+nonCoffee,Sea Salt Cocoa,Grande,salt_foam,30,ml,flavor
+nonCoffee,Sea Salt Cocoa,Grande,ice,1,cup,base
+
+nonCoffee,Sea Salt Cocoa,Venti,milk,220,ml,base
+nonCoffee,Sea Salt Cocoa,Venti,dark_choco_powder,35,grams,flavor
+nonCoffee,Sea Salt Cocoa,Venti,salt_foam,40,ml,flavor
+nonCoffee,Sea Salt Cocoa,Venti,ice,1.5,cup,base
+
+nonCoffee,Choco Salt Cocoa,Grande,milk,180,ml,base
+nonCoffee,Choco Salt Cocoa,Grande,dark_choco_powder,25,grams,flavor
+nonCoffee,Choco Salt Cocoa,Grande,salt_foam,30,ml,flavor
+nonCoffee,Choco Salt Cocoa,Grande,ice,1,cup,base
+
+nonCoffee,Choco Salt Cocoa,Venti,milk,220,ml,base
+nonCoffee,Choco Salt Cocoa,Venti,dark_choco_powder,35,grams,flavor
+nonCoffee,Choco Salt Cocoa,Venti,salt_foam,40,ml,flavor
+nonCoffee,Choco Salt Cocoa,Venti,ice,1.5,cup,base
+
+nonCoffee,Choco-Berry,Grande,milk,180,ml,base
+nonCoffee,Choco-Berry,Grande,dark_choco_powder,20,grams,flavor
+nonCoffee,Choco-Berry,Grande,strawberry_syrup,20,ml,flavor
+nonCoffee,Choco-Berry,Grande,ice,1,cup,base
+
+nonCoffee,Choco-Berry,Venti,milk,220,ml,base
+nonCoffee,Choco-Berry,Venti,dark_choco_powder,30,grams,flavor
+nonCoffee,Choco-Berry,Venti,strawberry_syrup,30,ml,flavor
+nonCoffee,Choco-Berry,Venti,ice,1.5,cup,base
+
+nonCoffee,Milky Biscoff,Grande,milk,180,ml,base
+nonCoffee,Milky Biscoff,Grande,biscoff_spread,20,grams,flavor
+nonCoffee,Milky Biscoff,Grande,ice,1,cup,base
+
+nonCoffee,Milky Biscoff,Venti,milk,220,ml,base
+nonCoffee,Milky Biscoff,Venti,biscoff_spread,30,grams,flavor
+nonCoffee,Milky Biscoff,Venti,ice,1.5,cup,base
+
+nonCoffee,Nutella,Grande,milk,180,ml,base
+nonCoffee,Nutella,Grande,nutella_spread,20,grams,flavor
+nonCoffee,Nutella,Grande,ice,1,cup,base
+
+nonCoffee,Nutella,Venti,milk,220,ml,base
+nonCoffee,Nutella,Venti,nutella_spread,30,grams,flavor
+nonCoffee,Nutella,Venti,ice,1.5,cup,base
+========================================================
+frappuccino,Macchiato,Grande,espresso_shot,1,shot,base
+frappuccino,Macchiato,Grande,milk,150,ml,base
+frappuccino,Macchiato,Grande,caramel_syrup,20,ml,flavor
+frappuccino,Macchiato,Grande,ice,1.5,cup,base
+
+frappuccino,Macchiato,Venti,espresso_shot,2,shot,base
+frappuccino,Macchiato,Venti,milk,200,ml,base
+frappuccino,Macchiato,Venti,caramel_syrup,30,ml,flavor
+frappuccino,Macchiato,Venti,ice,2,cup,base
+
+frappuccino,Caramel,Grande,espresso_shot,1,shot,base
+frappuccino,Caramel,Grande,milk,150,ml,base
+frappuccino,Caramel,Grande,caramel_syrup,25,ml,flavor
+frappuccino,Caramel,Grande,ice,1.5,cup,base
+
+frappuccino,Caramel,Venti,espresso_shot,2,shot,base
+frappuccino,Caramel,Venti,milk,200,ml,base
+frappuccino,Caramel,Venti,caramel_syrup,35,ml,flavor
+frappuccino,Caramel,Venti,ice,2,cup,base
+
+frappuccino,Dark Mocha,Grande,espresso_shot,1,shot,base
+frappuccino,Dark Mocha,Grande,milk,150,ml,base
+frappuccino,Dark Mocha,Grande,dark_choco_powder,25,grams,flavor
+frappuccino,Dark Mocha,Grande,ice,1.5,cup,base
+
+frappuccino,Dark Mocha,Venti,espresso_shot,2,shot,base
+frappuccino,Dark Mocha,Venti,milk,200,ml,base
+frappuccino,Dark Mocha,Venti,dark_choco_powder,35,grams,flavor
+frappuccino,Dark Mocha,Venti,ice,2,cup,base
+
+frappuccino,Coffee Crumble,Grande,espresso_shot,1,shot,base
+frappuccino,Coffee Crumble,Grande,milk,150,ml,base
+frappuccino,Coffee Crumble,Grande,oreo_crush,20,grams,flavor
+frappuccino,Coffee Crumble,Grande,ice,1.5,cup,base
+
+frappuccino,Coffee Crumble,Venti,espresso_shot,2,shot,base
+frappuccino,Coffee Crumble,Venti,milk,200,ml,base
+frappuccino,Coffee Crumble,Venti,oreo_crush,30,grams,flavor
+frappuccino,Coffee Crumble,Venti,ice,2,cup,base
+
+frappuccino,Coffee Fudge,Grande,espresso_shot,1,shot,base
+frappuccino,Coffee Fudge,Grande,milk,150,ml,base
+frappuccino,Coffee Fudge,Grande,choco_powder,25,grams,flavor
+frappuccino,Coffee Fudge,Grande,ice,1.5,cup,base
+
+frappuccino,Coffee Fudge,Venti,espresso_shot,2,shot,base
+frappuccino,Coffee Fudge,Venti,milk,200,ml,base
+frappuccino,Coffee Fudge,Venti,choco_powder,35,grams,flavor
+frappuccino,Coffee Fudge,Venti,ice,2,cup,base
+
+frappuccino,Almond Fudge,Grande,espresso_shot,1,shot,base
+frappuccino,Almond Fudge,Grande,milk,150,ml,base
+frappuccino,Almond Fudge,Grande,almond_syrup,20,ml,flavor
+frappuccino,Almond Fudge,Grande,choco_powder,15,grams,flavor
+frappuccino,Almond Fudge,Grande,ice,1.5,cup,base
+
+frappuccino,Almond Fudge,Venti,espresso_shot,2,shot,base
+frappuccino,Almond Fudge,Venti,milk,200,ml,base
+frappuccino,Almond Fudge,Venti,almond_syrup,30,ml,flavor
+frappuccino,Almond Fudge,Venti,choco_powder,25,grams,flavor
+frappuccino,Almond Fudge,Venti,ice,2,cup,base
+
+frappuccino,Mocha Jelly,Grande,espresso_shot,1,shot,base
+frappuccino,Mocha Jelly,Grande,milk,150,ml,base
+frappuccino,Mocha Jelly,Grande,dark_choco_powder,20,grams,flavor
+frappuccino,Mocha Jelly,Grande,ice,1.5,cup,base
+
+frappuccino,Mocha Jelly,Venti,espresso_shot,2,shot,base
+frappuccino,Mocha Jelly,Venti,milk,200,ml,base
+frappuccino,Mocha Jelly,Venti,dark_choco_powder,30,grams,flavor
+frappuccino,Mocha Jelly,Venti,ice,2,cup,base
+
+frappuccino,Coffee Jelly,Grande,espresso_shot,1,shot,base
+frappuccino,Coffee Jelly,Grande,milk,150,ml,base
+frappuccino,Coffee Jelly,Grande,ice,1.5,cup,base
+
+frappuccino,Coffee Jelly,Venti,espresso_shot,2,shot,base
+frappuccino,Coffee Jelly,Venti,milk,200,ml,base
+frappuccino,Coffee Jelly,Venti,ice,2,cup,base
+
+frappuccino,Nutella,Grande,espresso_shot,1,shot,base
+frappuccino,Nutella,Grande,milk,150,ml,base
+frappuccino,Nutella,Grande,nutella_spread,25,grams,flavor
+frappuccino,Nutella,Grande,ice,1.5,cup,base
+
+frappuccino,Nutella,Venti,espresso_shot,2,shot,base
+frappuccino,Nutella,Venti,milk,200,ml,base
+frappuccino,Nutella,Venti,nutella_spread,35,grams,flavor
+frappuccino,Nutella,Venti,ice,2,cup,base
+=========================================================
+nonCoffeeFrappe,Cookies & Cream,Grande,milk,150,ml,base
+nonCoffeeFrappe,Cookies & Cream,Grande,oreo_crush,30,grams,flavor
+nonCoffeeFrappe,Cookies & Cream,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Cookies & Cream,Venti,milk,200,ml,base
+nonCoffeeFrappe,Cookies & Cream,Venti,oreo_crush,40,grams,flavor
+nonCoffeeFrappe,Cookies & Cream,Venti,ice,2,cup,base
+
+nonCoffeeFrappe,Milo Cream,Grande,milk,150,ml,base
+nonCoffeeFrappe,Milo Cream,Grande,choco_powder,25,grams,flavor
+nonCoffeeFrappe,Milo Cream,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Milo Cream,Venti,milk,200,ml,base
+nonCoffeeFrappe,Milo Cream,Venti,choco_powder,35,grams,flavor
+nonCoffeeFrappe,Milo Cream,Venti,ice,2,cup,base
+
+nonCoffeeFrappe,Strawberry,Grande,milk,150,ml,base
+nonCoffeeFrappe,Strawberry,Grande,strawberry_syrup,30,ml,flavor
+nonCoffeeFrappe,Strawberry,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Strawberry,Venti,milk,200,ml,base
+nonCoffeeFrappe,Strawberry,Venti,strawberry_syrup,40,ml,flavor
+nonCoffeeFrappe,Strawberry,Venti,ice,2,cup,base
+
+nonCoffeeFrappe,Blueberry,Grande,milk,150,ml,base
+nonCoffeeFrappe,Blueberry,Grande,blueberry_syrup,30,ml,flavor
+nonCoffeeFrappe,Blueberry,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Blueberry,Venti,milk,200,ml,base
+nonCoffeeFrappe,Blueberry,Venti,blueberry_syrup,40,ml,flavor
+nonCoffeeFrappe,Blueberry,Venti,ice,2,cup,base
+
+nonCoffeeFrappe,Purple Yam,Grande,milk,150,ml,base
+nonCoffeeFrappe,Purple Yam,Grande,ube_powder,25,grams,flavor
+nonCoffeeFrappe,Purple Yam,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Purple Yam,Venti,milk,200,ml,base
+nonCoffeeFrappe,Purple Yam,Venti,ube_powder,35,grams,flavor
+nonCoffeeFrappe,Purple Yam,Venti,ice,2,cup,base
+
+nonCoffeeFrappe,Matcha Oreo,Grande,milk,150,ml,base
+nonCoffeeFrappe,Matcha Oreo,Grande,matcha_powder,10,grams,flavor
+nonCoffeeFrappe,Matcha Oreo,Grande,oreo_crush,20,grams,flavor
+nonCoffeeFrappe,Matcha Oreo,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Matcha Oreo,Venti,milk,200,ml,base
+nonCoffeeFrappe,Matcha Oreo,Venti,matcha_powder,15,grams,flavor
+nonCoffeeFrappe,Matcha Oreo,Venti,oreo_crush,30,grams,flavor
+nonCoffeeFrappe,Matcha Oreo,Venti,ice,2,cup,base
+
+nonCoffeeFrappe,Matcha Strawberry,Grande,milk,150,ml,base
+nonCoffeeFrappe,Matcha Strawberry,Grande,matcha_powder,10,grams,flavor
+nonCoffeeFrappe,Matcha Strawberry,Grande,strawberry_syrup,20,ml,flavor
+nonCoffeeFrappe,Matcha Strawberry,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Matcha Strawberry,Venti,milk,200,ml,base
+nonCoffeeFrappe,Matcha Strawberry,Venti,matcha_powder,15,grams,flavor
+nonCoffeeFrappe,Matcha Strawberry,Venti,strawberry_syrup,30,ml,flavor
+nonCoffeeFrappe,Matcha Strawberry,Venti,ice,2,cup,base
+
+nonCoffeeFrappe,Ube Oreo,Grande,milk,150,ml,base
+nonCoffeeFrappe,Ube Oreo,Grande,ube_powder,20,grams,flavor
+nonCoffeeFrappe,Ube Oreo,Grande,oreo_crush,20,grams,flavor
+nonCoffeeFrappe,Ube Oreo,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Ube Oreo,Venti,milk,200,ml,base
+nonCoffeeFrappe,Ube Oreo,Venti,ube_powder,30,grams,flavor
+nonCoffeeFrappe,Ube Oreo,Venti,oreo_crush,30,grams,flavor
+nonCoffeeFrappe,Ube Oreo,Venti,ice,2,cup,base
+
+nonCoffeeFrappe,Chocolate Chip Cream,Grande,milk,150,ml,base
+nonCoffeeFrappe,Chocolate Chip Cream,Grande,choco_powder,25,grams,flavor
+nonCoffeeFrappe,Chocolate Chip Cream,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Chocolate Chip Cream,Venti,milk,200,ml,base
+nonCoffeeFrappe,Chocolate Chip Cream,Venti,choco_powder,35,grams,flavor
+nonCoffeeFrappe,Chocolate Chip Cream,Venti,ice,2,cup,base
+
+nonCoffeeFrappe,Nutella Cream,Grande,milk,150,ml,base
+nonCoffeeFrappe,Nutella Cream,Grande,nutella_spread,25,grams,flavor
+nonCoffeeFrappe,Nutella Cream,Grande,ice,1.5,cup,base
+
+nonCoffeeFrappe,Nutella Cream,Venti,milk,200,ml,base
+nonCoffeeFrappe,Nutella Cream,Venti,nutella_spread,35,grams,flavor
+nonCoffeeFrappe,Nutella Cream,Venti,ice,2,cup,base
+======================================================================
+vietnameseCoffee,Americano,Grande,espresso_shot,1,shot,base
+vietnameseCoffee,Americano,Grande,water,200,ml,base
+vietnameseCoffee,Americano,Grande,ice,1,cup,base
+
+vietnameseCoffee,Americano,Venti,espresso_shot,2,shot,base
+vietnameseCoffee,Americano,Venti,water,300,ml,base
+vietnameseCoffee,Americano,Venti,ice,1.5,cup,base
+
+vietnameseCoffee,Cà Phê Español,Grande,espresso_shot,1,shot,base
+vietnameseCoffee,Cà Phê Español,Grande,condensed_milk,30,ml,flavor
+vietnameseCoffee,Cà Phê Español,Grande,ice,1,cup,base
+
+vietnameseCoffee,Cà Phê Español,Venti,espresso_shot,2,shot,base
+vietnameseCoffee,Cà Phê Español,Venti,condensed_milk,40,ml,flavor
+vietnameseCoffee,Cà Phê Español,Venti,ice,1.5,cup,base
+
+vietnameseCoffee,Iced Latte,Grande,espresso_shot,1,shot,base
+vietnameseCoffee,Iced Latte,Grande,milk,150,ml,base
+vietnameseCoffee,Iced Latte,Grande,ice,1,cup,base
+
+vietnameseCoffee,Iced Latte,Venti,espresso_shot,2,shot,base
+vietnameseCoffee,Iced Latte,Venti,milk,200,ml,base
+vietnameseCoffee,Iced Latte,Venti,ice,1.5,cup,base
+
+vietnameseCoffee,Matcha Latte,Grande,espresso_shot,1,shot,base
+vietnameseCoffee,Matcha Latte,Grande,milk,150,ml,base
+vietnameseCoffee,Matcha Latte,Grande,matcha_powder,10,grams,flavor
+vietnameseCoffee,Matcha Latte,Grande,ice,1,cup,base
+
+vietnameseCoffee,Matcha Latte,Venti,espresso_shot,2,shot,base
+vietnameseCoffee,Matcha Latte,Venti,milk,200,ml,base
+vietnameseCoffee,Matcha Latte,Venti,matcha_powder,15,grams,flavor
+vietnameseCoffee,Matcha Latte,Venti,ice,1.5,cup,base
+
+vietnameseCoffee,Salted Caramel,Grande,espresso_shot,1,shot,base
+vietnameseCoffee,Salted Caramel,Grande,milk,150,ml,base
+vietnameseCoffee,Salted Caramel,Grande,caramel_syrup,20,ml,flavor
+vietnameseCoffee,Salted Caramel,Grande,salt_foam,30,ml,flavor
+vietnameseCoffee,Salted Caramel,Grande,ice,1,cup,base
+
+vietnameseCoffee,Salted Caramel,Venti,espresso_shot,2,shot,base
+vietnameseCoffee,Salted Caramel,Venti,milk,200,ml,base
+vietnameseCoffee,Salted Caramel,Venti,caramel_syrup,30,ml,flavor
+vietnameseCoffee,Salted Caramel,Venti,salt_foam,40,ml,flavor
+vietnameseCoffee,Salted Caramel,Venti,ice,1.5,cup,base
+
+vietnameseCoffee,Oreo Latte,Grande,espresso_shot,1,shot,base
+vietnameseCoffee,Oreo Latte,Grande,milk,150,ml,base
+vietnameseCoffee,Oreo Latte,Grande,oreo_crush,20,grams,flavor
+vietnameseCoffee,Oreo Latte,Grande,ice,1,cup,base
+
+vietnameseCoffee,Oreo Latte,Venti,espresso_shot,2,shot,base
+vietnameseCoffee,Oreo Latte,Venti,milk,200,ml,base
+vietnameseCoffee,Oreo Latte,Venti,oreo_crush,30,grams,flavor
+vietnameseCoffee,Oreo Latte,Venti,ice,1.5,cup,base
+
+vietnameseCoffee,Dark Mocha Latte,Grande,espresso_shot,1,shot,base
+vietnameseCoffee,Dark Mocha Latte,Grande,milk,150,ml,base
+vietnameseCoffee,Dark Mocha Latte,Grande,dark_choco_powder,20,grams,flavor
+vietnameseCoffee,Dark Mocha Latte,Grande,ice,1,cup,base
+
+vietnameseCoffee,Dark Mocha Latte,Venti,espresso_shot,2,shot,base
+vietnameseCoffee,Dark Mocha Latte,Venti,milk,200,ml,base
+vietnameseCoffee,Dark Mocha Latte,Venti,dark_choco_powder,30,grams,flavor
+vietnameseCoffee,Dark Mocha Latte,Venti,ice,1.5,cup,base
+===================================================
+premium,Strawberry Latte,Grande,espresso_shot,1,shot,base
+premium,Strawberry Latte,Grande,milk,150,ml,base
+premium,Strawberry Latte,Grande,strawberry_syrup,25,ml,flavor
+premium,Strawberry Latte,Grande,ice,1,cup,base
+
+premium,Strawberry Latte,Venti,espresso_shot,2,shot,base
+premium,Strawberry Latte,Venti,milk,200,ml,base
+premium,Strawberry Latte,Venti,strawberry_syrup,35,ml,flavor
+premium,Strawberry Latte,Venti,ice,1.5,cup,base
+
+premium,Matcha Espresso,Grande,espresso_shot,1,shot,base
+premium,Matcha Espresso,Grande,milk,150,ml,base
+premium,Matcha Espresso,Grande,matcha_powder,10,grams,flavor
+premium,Matcha Espresso,Grande,ice,1,cup,base
+
+premium,Matcha Espresso,Venti,espresso_shot,2,shot,base
+premium,Matcha Espresso,Venti,milk,200,ml,base
+premium,Matcha Espresso,Venti,matcha_powder,15,grams,flavor
+premium,Matcha Espresso,Venti,ice,1.5,cup,base
+
+premium,Salty Cream Latte,Grande,espresso_shot,1,shot,base
+premium,Salty Cream Latte,Grande,milk,150,ml,base
+premium,Salty Cream Latte,Grande,salt_foam,30,ml,flavor
+premium,Salty Cream Latte,Grande,ice,1,cup,base
+
+premium,Salty Cream Latte,Venti,espresso_shot,2,shot,base
+premium,Salty Cream Latte,Venti,milk,200,ml,base
+premium,Salty Cream Latte,Venti,salt_foam,40,ml,flavor
+premium,Salty Cream Latte,Venti,ice,1.5,cup,base
+
+premium,Sea Salt Latte,Grande,espresso_shot,1,shot,base
+premium,Sea Salt Latte,Grande,milk,150,ml,base
+premium,Sea Salt Latte,Grande,salt_foam,30,ml,flavor
+premium,Sea Salt Latte,Grande,ice,1,cup,base
+
+premium,Sea Salt Latte,Venti,espresso_shot,2,shot,base
+premium,Sea Salt Latte,Venti,milk,200,ml,base
+premium,Sea Salt Latte,Venti,salt_foam,40,ml,flavor
+premium,Sea Salt Latte,Venti,ice,1.5,cup,base
+
+premium,Barista’s Drink,Grande,espresso_shot,1,shot,base
+premium,Barista’s Drink,Grande,milk,150,ml,base
+premium,Barista’s Drink,Grande,caramel_syrup,20,ml,flavor
+premium,Barista’s Drink,Grande,ice,1,cup,base
+
+premium,Barista’s Drink,Venti,espresso_shot,2,shot,base
+premium,Barista’s Drink,Venti,milk,200,ml,base
+premium,Barista’s Drink,Venti,caramel_syrup,30,ml,flavor
+premium,Barista’s Drink,Venti,ice,1.5,cup,base
+
+premium,Dulce De Leche,Grande,espresso_shot,1,shot,base
+premium,Dulce De Leche,Grande,milk,150,ml,base
+premium,Dulce De Leche,Grande,dulce_syrup,25,ml,flavor
+premium,Dulce De Leche,Grande,ice,1,cup,base
+
+premium,Dulce De Leche,Venti,espresso_shot,2,shot,base
+premium,Dulce De Leche,Venti,milk,200,ml,base
+premium,Dulce De Leche,Venti,dulce_syrup,35,ml,flavor
+premium,Dulce De Leche,Venti,ice,1.5,cup,base
+
+premium,Velvet Cream Latte,Grande,espresso_shot,1,shot,base
+premium,Velvet Cream Latte,Grande,milk,150,ml,base
+premium,Velvet Cream Latte,Grande,red_velvet_powder,20,grams,flavor
+premium,Velvet Cream Latte,Grande,ice,1,cup,base
+
+premium,Velvet Cream Latte,Venti,espresso_shot,2,shot,base
+premium,Velvet Cream Latte,Venti,milk,200,ml,base
+premium,Velvet Cream Latte,Venti,red_velvet_powder,30,grams,flavor
+premium,Velvet Cream Latte,Venti,ice,1.5,cup,base
+
+premium,White Mocha Latte,Grande,espresso_shot,1,shot,base
+premium,White Mocha Latte,Grande,milk,150,ml,base
+premium,White Mocha Latte,Grande,white_choco_syrup,25,ml,flavor
+premium,White Mocha Latte,Grande,ice,1,cup,base
+
+premium,White Mocha Latte,Venti,espresso_shot,2,shot,base
+premium,White Mocha Latte,Venti,milk,200,ml,base
+premium,White Mocha Latte,Venti,white_choco_syrup,35,ml,flavor
+premium,White Mocha Latte,Venti,ice,1.5,cup,base
+
+premium,Vanilla Sweet Cream,Grande,espresso_shot,1,shot,base
+premium,Vanilla Sweet Cream,Grande,milk,150,ml,base
+premium,Vanilla Sweet Cream,Grande,vanilla_syrup,25,ml,flavor
+premium,Vanilla Sweet Cream,Grande,ice,1,cup,base
+
+premium,Vanilla Sweet Cream,Venti,espresso_shot,2,shot,base
+premium,Vanilla Sweet Cream,Venti,milk,200,ml,base
+premium,Vanilla Sweet Cream,Venti,vanilla_syrup,35,ml,flavor
+premium,Vanilla Sweet Cream,Venti,ice,1.5,cup,base
+
+premium,Toffee Nut Latte,Grande,espresso_shot,1,shot,base
+premium,Toffee Nut Latte,Grande,milk,150,ml,base
+premium,Toffee Nut Latte,Grande,toffee_syrup,25,ml,flavor
+premium,Toffee Nut Latte,Grande,ice,1,cup,base
+
+premium,Toffee Nut Latte,Venti,espresso_shot,2,shot,base
+premium,Toffee Nut Latte,Venti,milk,200,ml,base
+premium,Toffee Nut Latte,Venti,toffee_syrup,35,ml,flavor
+premium,Toffee Nut Latte,Venti,ice,1.5,cup,base
+
+premium,Almond Latte,Grande,espresso_shot,1,shot,base
+premium,Almond Latte,Grande,milk,150,ml,base
+premium,Almond Latte,Grande,almond_syrup,25,ml,flavor
+premium,Almond Latte,Grande,ice,1,cup,base
+
+premium,Almond Latte,Venti,espresso_shot,2,shot,base
+premium,Almond Latte,Venti,milk,200,ml,base
+premium,Almond Latte,Venti,almond_syrup,35,ml,flavor
+premium,Almond Latte,Venti,ice,1.5,cup,base
+
+premium,Peanut Butter Latte,Grande,espresso_shot,1,shot,base
+premium,Peanut Butter Latte,Grande,milk,150,ml,base
+premium,Peanut Butter Latte,Grande,peanut_butter,25,grams,flavor
+premium,Peanut Butter Latte,Grande,ice,1,cup,base
+
+premium,Peanut Butter Latte,Venti,espresso_shot,2,shot,base
+premium,Peanut Butter Latte,Venti,milk,200,ml,base
+premium,Peanut Butter Latte,Venti,peanut_butter,35,grams,flavor
+premium,Peanut Butter Latte,Venti,ice,1.5,cup,base
+
+premium,Biscoff Latte,Grande,espresso_shot,1,shot,base
+premium,Biscoff Latte,Grande,milk,150,ml,base
+premium,Biscoff Latte,Grande,biscoff_spread,25,grams,flavor
+premium,Biscoff Latte,Grande,ice,1,cup,base
+
+premium,Biscoff Latte,Venti,espresso_shot,2,shot,base
+premium,Biscoff Latte,Venti,milk,200,ml,base
+premium,Biscoff Latte,Venti,biscoff_spread,35,grams,flavor
+premium,Biscoff Latte,Venti,ice,1.5,cup,base
+
+premium,Nutella Latte,Grande,espresso_shot,1,shot,base
+premium,Nutella Latte,Grande,milk,150,ml,base
+premium,Nutella Latte,Grande,nutella_spread,25,grams,flavor
+premium,Nutella Latte,Grande,ice,1,cup,base
+
+premium,Nutella Latte,Venti,espresso_shot,2,shot,base
+premium,Nutella Latte,Venti,milk,200,ml,base
+premium,Nutella Latte,Venti,nutella_spread,35,grams,flavor
+premium,Nutella Latte,Venti,ice,1.5,cup,base

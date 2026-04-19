@@ -1,17 +1,52 @@
 addon_name,ingredient_name,qty_used,unit
-Yakult,ingredient_placeholder,1,unit
-Dutchmill,ingredient_placeholder,1,unit
-Nata,ingredient_placeholder,1,unit
-Chia Seeds,ingredient_placeholder,1,unit
-Premium Upgrade,ingredient_placeholder,1,unit
-Extra Bag,ingredient_placeholder,1,unit
-Salty Cream,ingredient_placeholder,1,unit
-Cream Cheese,ingredient_placeholder,1,unit
-Oreo,ingredient_placeholder,1,unit
-Coffee Jelly,ingredient_placeholder,1,unit
-Boba Pearl,ingredient_placeholder,1,unit
-Sugar Jelly,ingredient_placeholder,1,unit
-Lemon Grass Oolong Upgrade,ingredient_placeholder,1,unit
-Extra Shot,ingredient_placeholder,1,unit
-Milk,ingredient_placeholder,1,unit
-Whip Cream,ingredient_placeholder,1,unit
+Yakult,yakult,1,bottle
+Dutchmill,dutchmill,1,bottle
+Nata,nata_de_coco,50,grams
+Chia Seeds,chia_seeds,10,grams
+yogurt_base,base,unit,100,20,50
+passionfruit_syrup,flavor,ml,2000,500,1000
+biscoff_spread,flavor,grams,1000,200,500
+
+espresso_shot,coffee,shot,500,100,300
+hot_water,base,ml,10000,2000,5000
+milk,base,ml,8000,2000,4000
+condensed_milk,flavor,ml,2000,500,1000
+caramel_syrup,flavor,ml,2000,500,1000
+salt_foam,flavor,ml,1000,200,500
+matcha_powder,flavor,grams,1000,200,500
+
+tea_bag_green,tea,bag,200,50,100
+tea_bag_spearmint,tea,bag,200,50,100
+tea_bag_chamomile,tea,bag,200,50,100
+tea_bag_hibiscus,tea,bag,200,50,100
+tea_bag_butterfly_pea,tea,bag,200,50,100
+
+Extra Bag,tea_bag_generic,1,bag
+
+tea_bag_generic,tea,bag,200,50,100
+
+tea_base,tea,unit,200,50,100
+wintermelon_syrup,flavor,ml,2000,500,1000
+oreo_crush,flavor,grams,2000,500,1000
+red_velvet_powder,flavor,grams,1000,200,500
+dark_choco_powder,flavor,grams,1000,200,500
+
+cream_cheese_foam,flavor,ml,1000,200,500
+coffee_jelly,addon,grams,2000,500,1000
+boba_pearl,addon,grams,3000,800,1500
+sugar_jelly,addon,grams,2000,500,1000
+
+green_tea_base,tea,unit,200,50,100
+
+choco_powder,flavor,grams,1000,200,500
+ube_powder,flavor,grams,1000,200,500
+nutella_spread,flavor,grams,1000,200,500
+whipped_cream,flavor,ml,1000,200,500
+
+almond_syrup,flavor,ml,1000,200,500
+
+dulce_syrup,flavor,ml,1000,200,500
+white_choco_syrup,flavor,ml,1000,200,500
+vanilla_syrup,flavor,ml,1000,200,500
+toffee_syrup,flavor,ml,1000,200,500
+peanut_butter,flavor,grams,1000,200,500
