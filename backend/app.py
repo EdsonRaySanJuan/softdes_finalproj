@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -112,7 +113,19 @@ def seed_admin():
 
         conn.commit()
 
-        cursor.execute("SELECT user_id, full_name, username, role, status FROM users WHERE user_id = %s" if is_postgres() else "SELECT user_id, full_name, username, role, status FROM users WHERE user_id = ?", ("ADM001",))
+        if is_postgres():
+            cursor.execute("""
+                SELECT user_id, full_name, username, role, status
+                FROM users
+                WHERE user_id = %s
+            """, ("ADM001",))
+        else:
+            cursor.execute("""
+                SELECT user_id, full_name, username, role, status
+                FROM users
+                WHERE user_id = ?
+            """, ("ADM001",))
+
         row = cursor.fetchone()
         conn.close()
 
@@ -130,7 +143,7 @@ def seed_admin():
             "success": False,
             "error": str(e)
         }), 500
-    
+
 @app.route("/api/debug/inventory", methods=["GET"])
 def debug_inventory():
     try:
@@ -161,8 +174,111 @@ def debug_inventory():
             "using_postgres": is_postgres(),
             "error": str(e)
         }), 500
-    
-    
+
+@app.route("/api/debug/seed-inventory", methods=["GET"])
+def seed_inventory():
+    try:
+        base_dir = os.path.abspath(os.path.dirname(__file__))
+        csv_path = os.path.join(base_dir, "cafe_ingredients_inventory.csv")
+
+        if not os.path.exists(csv_path):
+            return jsonify({
+                "success": False,
+                "error": f"CSV not found at {csv_path}"
+            }), 404
+
+        df = pd.read_csv(csv_path)
+        df = df.dropna(subset=["ingredient_name", "stock_qty", "reorder_level"])
+
+        df["supplier"] = df["supplier"].fillna("Unknown")
+        df["unit"] = df["unit"].fillna("pcs")
+        df["ingredient_name"] = df["ingredient_name"].astype(str).str.strip()
+        df["storage_type"] = df["storage_type"].fillna("General")
+        df = df.drop_duplicates(subset=["ingredient_name"], keep="first")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        inserted_or_updated = 0
+
+        for _, row in df.iterrows():
+            item_name = str(row["ingredient_name"]).strip()
+            category = str(row["storage_type"]).strip()
+            unit = str(row["unit"]).strip()
+            current_stock = int(float(row["stock_qty"]))
+            reorder_level = int(float(row["reorder_level"]))
+            reorder_qty = int(float(row["reorder_qty"])) if "reorder_qty" in row and pd.notna(row["reorder_qty"]) else 0
+            supplier = str(row["supplier"]).strip()
+
+            status = "Normal"
+            if current_stock <= 0:
+                status = "Out of Stock"
+            elif current_stock <= (reorder_level * 0.25):
+                status = "Critical"
+            elif current_stock <= reorder_level:
+                status = "Low"
+
+            if is_postgres():
+                cursor.execute("""
+                    INSERT INTO inventory (
+                        item_name, category, unit, current_stock,
+                        reorder_level, reorder_qty, status, supplier
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (item_name)
+                    DO UPDATE SET
+                        category = EXCLUDED.category,
+                        unit = EXCLUDED.unit,
+                        current_stock = EXCLUDED.current_stock,
+                        reorder_level = EXCLUDED.reorder_level,
+                        reorder_qty = EXCLUDED.reorder_qty,
+                        status = EXCLUDED.status,
+                        supplier = EXCLUDED.supplier
+                """, (
+                    item_name, category, unit, current_stock,
+                    reorder_level, reorder_qty, status, supplier
+                ))
+            else:
+                cursor.execute("""
+                    INSERT OR REPLACE INTO inventory (
+                        item_name, category, unit, current_stock,
+                        reorder_level, reorder_qty, status, supplier
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    item_name, category, unit, current_stock,
+                    reorder_level, reorder_qty, status, supplier
+                ))
+
+            inserted_or_updated += 1
+
+        conn.commit()
+
+        cursor.execute("SELECT COUNT(*) AS inventory_count FROM inventory")
+        row = cursor.fetchone()
+        conn.close()
+
+        if isinstance(row, dict):
+            inventory_count = row["inventory_count"]
+        else:
+            inventory_count = row["inventory_count"] if "inventory_count" in row.keys() else row[0]
+
+        return jsonify({
+            "success": True,
+            "message": "Inventory seeded successfully",
+            "csv_path": csv_path,
+            "processed_rows": int(inserted_or_updated),
+            "inventory_count": int(inventory_count),
+            "using_postgres": is_postgres()
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "using_postgres": is_postgres(),
+            "error": str(e)
+        }), 500
+
 app.register_blueprint(report_bp, url_prefix="/api/reports")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(order_bp, url_prefix="/api/orders")
