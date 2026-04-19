@@ -1,95 +1,118 @@
-from flask import Blueprint, request, jsonify
-from datetime import datetime
 import os
 import csv
+import pandas as pd
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 
-from db import get_db_connection, is_postgres
+from db import init_db, get_db_connection, is_postgres
+from routes.report_routes import report_bp
+from routes.dashboard_routes import dashboard_bp
+from routes.order_routes import order_bp
+from routes.inventory_routes import inventory_bp
+from routes.auth_routes import auth_bp
+from routes.user_routes import user_bp
+from routes.rpa_routes import rpa_bp
 
-order_bp = Blueprint("orders", __name__)
+
+app = Flask(__name__)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-BACKEND_DIR = os.path.dirname(BASE_DIR)
-DATA_DIR = os.path.join(BACKEND_DIR, "data")
+DATA_DIR = os.path.join(BASE_DIR, "data")
 DRINK_RECIPES_PATH = os.path.join(DATA_DIR, "drink_recipes.csv")
 ADDON_RECIPES_PATH = os.path.join(DATA_DIR, "addon_recipes.csv")
 
-
-def normalize_text(value):
-    return str(value or "").strip().lower()
-
-
-def load_csv_rows(path):
-    if not os.path.exists(path):
-        return []
-    with open(path, "r", encoding="utf-8-sig", newline="") as f:
-        return list(csv.DictReader(f))
+ALLOWED_ORIGINS = [
+    "https://softdes-finalproj.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
 
 
-def get_base_recipe_rows(menu_item, size_label):
-    size_map = {
-        "Regular": "regular",
-        "Grande": "grande",
-        "Venti": "venti",
-        "Grande 16oz": "grande",
-        "Venti 22oz": "venti",
-        "Small": "small",
-        "Medium": "medium",
-        "Large": "large",
-    }
+def is_allowed_origin(origin):
+    if not origin:
+        return False
 
-    normalized_size = size_map.get(size_label, normalize_text(size_label))
-    rows = load_csv_rows(DRINK_RECIPES_PATH)
+    if origin in ALLOWED_ORIGINS:
+        return True
 
-    return [
-        row for row in rows
-        if normalize_text(row.get("menu_item")) == normalize_text(menu_item)
-        and normalize_text(row.get("size")) == normalize_text(normalized_size)
-    ]
+    if origin.startswith("https://softdes-finalproj-") and origin.endswith(".vercel.app"):
+        return True
+
+    return False
 
 
-def get_addon_recipe_rows(addon_name):
-    rows = load_csv_rows(ADDON_RECIPES_PATH)
-    return [
-        row for row in rows
-        if normalize_text(row.get("addon_name")) == normalize_text(addon_name)
-    ]
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get("Origin")
+
+    if is_allowed_origin(origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+
+    return response
 
 
-def ensure_sales_table_exists():
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        origin = request.headers.get("Origin")
+        response = jsonify({"ok": True})
+
+        if is_allowed_origin(origin):
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+
+        return response, 200
+
+
+CORS(
+    app,
+    resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
+    supports_credentials=True
+)
+
+
+def ensure_sales_table_schema():
     conn = get_db_connection()
     cursor = conn.cursor()
 
     if is_postgres():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS public.sales (
-                id SERIAL PRIMARY KEY,
-                order_id INTEGER NOT NULL,
-                timestamp TEXT NOT NULL,
-                item_name TEXT NOT NULL,
-                category TEXT,
-                size TEXT,
-                qty INTEGER NOT NULL,
-                unit_price REAL NOT NULL,
-                line_total REAL NOT NULL,
-                addons TEXT,
-                payment_method TEXT,
-                cash REAL,
-                change REAL,
-                table_no TEXT
+                id SERIAL PRIMARY KEY
             )
         """)
+
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS order_id INTEGER")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS timestamp TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS item_name TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS category TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS size TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS qty INTEGER")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS unit_price REAL")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS line_total REAL")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS addons TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS payment_method TEXT")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS cash REAL")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS change REAL")
+        cursor.execute("ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS table_no TEXT")
     else:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS sales (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                order_id INTEGER NOT NULL,
-                timestamp TEXT NOT NULL,
-                item_name TEXT NOT NULL,
+                order_id INTEGER,
+                timestamp TEXT,
+                item_name TEXT,
                 category TEXT,
                 size TEXT,
-                qty INTEGER NOT NULL,
-                unit_price REAL NOT NULL,
-                line_total REAL NOT NULL,
+                qty INTEGER,
+                unit_price REAL,
+                line_total REAL,
                 addons TEXT,
                 payment_method TEXT,
                 cash REAL,
@@ -102,91 +125,121 @@ def ensure_sales_table_exists():
     conn.close()
 
 
-def get_next_order_id(cursor):
-    if is_postgres():
-        cursor.execute("""
-            SELECT COALESCE(MAX(order_id), 0) + 1 AS next_id
-            FROM public.sales
-        """)
-    else:
-        cursor.execute("""
-            SELECT COALESCE(MAX(order_id), 0) + 1 AS next_id
-            FROM sales
-        """)
+def ensure_recipe_csv_placeholders():
+    os.makedirs(DATA_DIR, exist_ok=True)
 
-    row = cursor.fetchone()
-    if not row:
-        return 1
+    if not os.path.exists(DRINK_RECIPES_PATH):
+        with open(DRINK_RECIPES_PATH, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "menu_category",
+                "menu_item",
+                "size",
+                "ingredient_name",
+                "qty_used",
+                "unit",
+                "recipe_type",
+                "notes",
+            ])
 
-    if isinstance(row, dict):
-        return int(row["next_id"])
-
-    return int(row["next_id"] if "next_id" in row.keys() else row[0])
-
-
-def deduct_inventory_ingredient(cursor, ingredient_name, qty_needed, inventory_warnings):
-    if is_postgres():
-        cursor.execute("""
-            UPDATE inventory
-            SET current_stock = current_stock - %s
-            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(%s))
-        """, (qty_needed, ingredient_name))
-    else:
-        cursor.execute("""
-            UPDATE inventory
-            SET current_stock = current_stock - ?
-            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))
-        """, (qty_needed, ingredient_name))
-
-    if cursor.rowcount == 0:
-        inventory_warnings.append(
-            f"Missing inventory ingredient match for '{ingredient_name}'"
-        )
-        return
-
-    if is_postgres():
-        cursor.execute("""
-            UPDATE inventory
-            SET status = CASE
-                WHEN current_stock <= 0 THEN 'Out of Stock'
-                WHEN current_stock <= (reorder_level * 0.25) THEN 'Critical'
-                WHEN current_stock <= reorder_level THEN 'Low'
-                ELSE 'Normal'
-            END
-            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(%s))
-        """, (ingredient_name,))
-    else:
-        cursor.execute("""
-            UPDATE inventory
-            SET status = CASE
-                WHEN current_stock <= 0 THEN 'Out of Stock'
-                WHEN current_stock <= (reorder_level * 0.25) THEN 'Critical'
-                WHEN current_stock <= reorder_level THEN 'Low'
-                ELSE 'Normal'
-            END
-            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))
-        """, (ingredient_name,))
+    if not os.path.exists(ADDON_RECIPES_PATH):
+        with open(ADDON_RECIPES_PATH, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "addon_name",
+                "ingredient_name",
+                "qty_used",
+                "unit",
+                "notes",
+            ])
 
 
-@order_bp.route("/debug-db", methods=["GET"])
-def debug_orders_db():
+init_db()
+ensure_sales_table_schema()
+ensure_recipe_csv_placeholders()
+
+
+@app.route("/api/debug/db-check", methods=["GET"])
+def debug_db_check():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT COUNT(*) AS user_count FROM users")
+        row = cursor.fetchone()
+        conn.close()
+
+        if isinstance(row, dict):
+            user_count = row["user_count"]
+        else:
+            user_count = row["user_count"] if "user_count" in row.keys() else row[0]
+
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "user_count": int(user_count)
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "error": str(e)
+        }), 500
+
+
+@app.route("/api/debug/tables", methods=["GET"])
+def debug_tables():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
 
         if is_postgres():
             cursor.execute("""
-                SELECT table_schema, table_name
+                SELECT table_name
                 FROM information_schema.tables
-                WHERE table_name = 'sales'
-                ORDER BY table_schema, table_name
+                WHERE table_schema = 'public'
+                ORDER BY table_name
             """)
+            rows = cursor.fetchall()
+            tables = [row["table_name"] if isinstance(row, dict) else row[0] for row in rows]
         else:
             cursor.execute("""
                 SELECT name
                 FROM sqlite_master
-                WHERE type = 'table' AND name = 'sales'
+                WHERE type = 'table'
+                ORDER BY name
             """)
+            rows = cursor.fetchall()
+            tables = [row["name"] if isinstance(row, dict) else row[0] for row in rows]
+
+        conn.close()
+
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "tables": tables
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "error": str(e)
+        }), 500
+
+
+@app.route("/api/debug/sales-columns", methods=["GET"])
+def debug_sales_columns():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        if is_postgres():
+            cursor.execute("""
+                SELECT column_name, data_type
+                FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = 'sales'
+                ORDER BY ordinal_position
+            """)
+        else:
+            cursor.execute("PRAGMA table_info(sales)")
 
         rows = cursor.fetchall()
         conn.close()
@@ -196,9 +249,195 @@ def debug_orders_db():
             result.append(row if isinstance(row, dict) else dict(row))
 
         return jsonify({
-            "success": True,
             "using_postgres": is_postgres(),
-            "sales_table_lookup": result
+            "columns": result
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "error": str(e)
+        }), 500
+
+
+@app.route("/api/debug/seed-admin", methods=["GET"])
+def seed_admin():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        if is_postgres():
+            cursor.execute("""
+                INSERT INTO users (user_id, full_name, username, password, role, status)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (user_id) DO NOTHING
+            """, ("ADM001", "System Boss", "admin", "admin123", "Admin", "Active"))
+        else:
+            cursor.execute("""
+                INSERT OR IGNORE INTO users (user_id, full_name, username, password, role, status)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, ("ADM001", "System Boss", "admin", "admin123", "Admin", "Active"))
+
+        conn.commit()
+
+        if is_postgres():
+            cursor.execute("""
+                SELECT user_id, full_name, username, role, status
+                FROM users
+                WHERE user_id = %s
+            """, ("ADM001",))
+        else:
+            cursor.execute("""
+                SELECT user_id, full_name, username, role, status
+                FROM users
+                WHERE user_id = ?
+            """, ("ADM001",))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            row = row if isinstance(row, dict) else dict(row)
+
+        return jsonify({
+            "success": True,
+            "message": "Admin user seeded successfully",
+            "user": row
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route("/api/debug/inventory", methods=["GET"])
+def debug_inventory():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT id, item_name, current_stock, reorder_level, status, supplier
+            FROM inventory
+            ORDER BY item_name ASC
+            LIMIT 50
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+
+        result = []
+        for row in rows:
+            result.append(row if isinstance(row, dict) else dict(row))
+
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "inventory_count": len(result),
+            "items": result
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "error": str(e)
+        }), 500
+
+
+@app.route("/api/debug/seed-inventory", methods=["GET"])
+def seed_inventory():
+    try:
+        csv_path = os.path.join(BASE_DIR, "cafe_ingredients_inventory.csv")
+
+        if not os.path.exists(csv_path):
+            return jsonify({
+                "success": False,
+                "error": f"CSV not found at {csv_path}"
+            }), 404
+
+        df = pd.read_csv(csv_path)
+        df = df.dropna(subset=["ingredient_name", "stock_qty", "reorder_level"])
+
+        df["supplier"] = df["supplier"].fillna("Unknown")
+        df["unit"] = df["unit"].fillna("pcs")
+        df["ingredient_name"] = df["ingredient_name"].astype(str).str.strip()
+        df["storage_type"] = df["storage_type"].fillna("General")
+        df = df.drop_duplicates(subset=["ingredient_name"], keep="first")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        inserted_or_updated = 0
+
+        for _, row in df.iterrows():
+            item_name = str(row["ingredient_name"]).strip()
+            category = str(row["storage_type"]).strip()
+            unit = str(row["unit"]).strip()
+            current_stock = int(float(row["stock_qty"]))
+            reorder_level = int(float(row["reorder_level"]))
+            reorder_qty = int(float(row["reorder_qty"])) if "reorder_qty" in row and pd.notna(row["reorder_qty"]) else 0
+            supplier = str(row["supplier"]).strip()
+
+            status = "Normal"
+            if current_stock <= 0:
+                status = "Out of Stock"
+            elif current_stock <= (reorder_level * 0.25):
+                status = "Critical"
+            elif current_stock <= reorder_level:
+                status = "Low"
+
+            if is_postgres():
+                cursor.execute("""
+                    INSERT INTO inventory (
+                        item_name, category, unit, current_stock,
+                        reorder_level, reorder_qty, status, supplier
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (item_name)
+                    DO UPDATE SET
+                        category = EXCLUDED.category,
+                        unit = EXCLUDED.unit,
+                        current_stock = EXCLUDED.current_stock,
+                        reorder_level = EXCLUDED.reorder_level,
+                        reorder_qty = EXCLUDED.reorder_qty,
+                        status = EXCLUDED.status,
+                        supplier = EXCLUDED.supplier
+                """, (
+                    item_name, category, unit, current_stock,
+                    reorder_level, reorder_qty, status, supplier
+                ))
+            else:
+                cursor.execute("""
+                    INSERT OR REPLACE INTO inventory (
+                        item_name, category, unit, current_stock,
+                        reorder_level, reorder_qty, status, supplier
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    item_name, category, unit, current_stock,
+                    reorder_level, reorder_qty, status, supplier
+                ))
+
+            inserted_or_updated += 1
+
+        conn.commit()
+
+        cursor.execute("SELECT COUNT(*) AS inventory_count FROM inventory")
+        row = cursor.fetchone()
+        conn.close()
+
+        if isinstance(row, dict):
+            inventory_count = row["inventory_count"]
+        else:
+            inventory_count = row["inventory_count"] if "inventory_count" in row.keys() else row[0]
+
+        return jsonify({
+            "success": True,
+            "message": "Inventory seeded successfully",
+            "csv_path": csv_path,
+            "processed_rows": int(inserted_or_updated),
+            "inventory_count": int(inventory_count),
+            "using_postgres": is_postgres()
         }), 200
 
     except Exception as e:
@@ -209,211 +448,25 @@ def debug_orders_db():
         }), 500
 
 
-@order_bp.route("/", methods=["GET"])
-def get_orders():
-    try:
-        ensure_sales_table_exists()
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        if is_postgres():
-            cursor.execute("""
-                SELECT order_id, timestamp, item_name, category, size, qty,
-                       unit_price, line_total, addons
-                FROM public.sales
-                ORDER BY order_id DESC, timestamp DESC
-            """)
-        else:
-            cursor.execute("""
-                SELECT order_id, timestamp, item_name, category, size, qty,
-                       unit_price, line_total, addons
-                FROM sales
-                ORDER BY order_id DESC, timestamp DESC
-            """)
-
-        rows = cursor.fetchall()
-        conn.close()
-
-        result = []
-        for row in rows:
-            result.append(row if isinstance(row, dict) else dict(row))
-
-        return jsonify(result), 200
-
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+app.register_blueprint(report_bp, url_prefix="/api/reports")
+app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
+app.register_blueprint(order_bp, url_prefix="/api/orders")
+app.register_blueprint(inventory_bp, url_prefix="/api/inventory")
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
+app.register_blueprint(user_bp, url_prefix="/api/users")
+app.register_blueprint(rpa_bp, url_prefix="/api/rpa")
 
 
-@order_bp.route("/", methods=["POST"])
-def create_order():
-    try:
-        ensure_sales_table_exists()
+@app.route("/")
+def home():
+    return {"message": "Cafe POS Backend is running", "status": "online"}
 
-        data = request.get_json(silent=True) or {}
 
-        items = data.get("items", [])
-        total = float(data.get("total", 0) or 0)
-        cash = float(data.get("cash", 0) or 0)
-        change = float(data.get("change", 0) or 0)
-        table_no = str(data.get("table", "Walk-in")).strip()
-        payment_method = str(data.get("payment_method", "Cash")).strip()
+@app.route("/api/health", methods=["GET"])
+def health():
+    return jsonify({"ok": True}), 200
 
-        if not items:
-            return jsonify({"success": False, "error": "No items in order"}), 400
 
-        if cash < total:
-            return jsonify({"success": False, "error": "Insufficient cash"}), 400
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        order_id = get_next_order_id(cursor)
-        inventory_warnings = []
-        lines_written = 0
-
-        for item in items:
-            name = str(item.get("name", "")).strip()
-            category = str(item.get("category", "")).strip()
-            size = str(item.get("size", "")).strip()
-            qty = int(item.get("qty", 1) or 1)
-            unit_price = float(item.get("unitPrice", 0) or 0)
-            addons_list = item.get("addons", []) or []
-
-            if not name:
-                inventory_warnings.append("Encountered order item with missing name.")
-                continue
-
-            line_total = unit_price * qty
-            addons_text = ", ".join(
-                [str(a.get("name", "")).strip() for a in addons_list if str(a.get("name", "")).strip()]
-            ) or "None"
-
-            if is_postgres():
-                cursor.execute("""
-                    INSERT INTO public.sales (
-                        order_id, timestamp, item_name, category, size, qty,
-                        unit_price, line_total, addons, payment_method, cash, change, table_no
-                    )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (
-                    order_id, timestamp, name, category, size, qty,
-                    unit_price, line_total, addons_text, payment_method, cash, change, table_no
-                ))
-            else:
-                cursor.execute("""
-                    INSERT INTO sales (
-                        order_id, timestamp, item_name, category, size, qty,
-                        unit_price, line_total, addons, payment_method, cash, change, table_no
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    order_id, timestamp, name, category, size, qty,
-                    unit_price, line_total, addons_text, payment_method, cash, change, table_no
-                ))
-
-            lines_written += 1
-
-            recipe_rows = get_base_recipe_rows(name, size)
-
-            if not recipe_rows:
-                inventory_warnings.append(
-                    f"No base recipe found for item='{name}' size='{size}'. Sale saved, but ingredients were not deducted."
-                )
-            else:
-                for recipe in recipe_rows:
-                    ingredient_name = str(recipe.get("ingredient_name", "")).strip()
-                    qty_used = float(recipe.get("qty_used", 0) or 0) * qty
-
-                    if ingredient_name and qty_used > 0:
-                        deduct_inventory_ingredient(cursor, ingredient_name, qty_used, inventory_warnings)
-
-            for addon in addons_list:
-                addon_name = str(addon.get("name", "")).strip()
-                if not addon_name:
-                    continue
-
-                addon_recipe_rows = get_addon_recipe_rows(addon_name)
-
-                if not addon_recipe_rows:
-                    inventory_warnings.append(
-                        f"No addon recipe found for addon='{addon_name}'"
-                    )
-                    continue
-
-                for addon_recipe in addon_recipe_rows:
-                    ingredient_name = str(addon_recipe.get("ingredient_name", "")).strip()
-                    qty_used = float(addon_recipe.get("qty_used", 0) or 0) * qty
-
-                    if ingredient_name and qty_used > 0:
-                        deduct_inventory_ingredient(cursor, ingredient_name, qty_used, inventory_warnings)
-
-        if is_postgres():
-            cursor.execute("""
-                SELECT item_name, current_stock, reorder_level
-                FROM inventory
-                WHERE current_stock <= reorder_level
-            """)
-        else:
-            cursor.execute("""
-                SELECT item_name, current_stock, reorder_level
-                FROM inventory
-                WHERE current_stock <= reorder_level
-            """)
-
-        low_stock_items = cursor.fetchall()
-
-        for low_item in low_stock_items:
-            row = low_item if isinstance(low_item, dict) else dict(low_item)
-            item_name = row["item_name"]
-            current_stock = row["current_stock"]
-            reorder_level = row["reorder_level"]
-
-            if is_postgres():
-                cursor.execute("""
-                    INSERT INTO rpa_logs (timestamp, action, details)
-                    VALUES (%s, %s, %s)
-                """, (
-                    timestamp,
-                    "LOW_STOCK_ALERT",
-                    f"{item_name} is low on stock ({current_stock} <= reorder level {reorder_level})"
-                ))
-            else:
-                cursor.execute("""
-                    INSERT INTO rpa_logs (timestamp, action, details)
-                    VALUES (?, ?, ?)
-                """, (
-                    timestamp,
-                    "LOW_STOCK_ALERT",
-                    f"{item_name} is low on stock ({current_stock} <= reorder level {reorder_level})"
-                ))
-
-        conn.commit()
-        conn.close()
-
-        return jsonify({
-            "success": True,
-            "message": "Order processed successfully",
-            "order_id": order_id,
-            "total": total,
-            "cash": cash,
-            "change": change,
-            "lines_written": lines_written,
-            "inventory_warnings": inventory_warnings,
-        }), 201
-
-    except Exception as e:
-        try:
-            conn.rollback()
-            conn.close()
-        except:
-            pass
-
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
