@@ -44,19 +44,18 @@ def init_db():
             CREATE TABLE IF NOT EXISTS sales (
                 id SERIAL PRIMARY KEY,
                 order_id INTEGER,
-                order_line_id INTEGER,
-                datetime TIMESTAMP,
-                item_id TEXT,
+                timestamp TEXT,
                 item_name TEXT,
                 category TEXT,
                 size TEXT,
                 qty INTEGER,
-                unit_price NUMERIC(10,2),
+                unit_price REAL,
+                line_total REAL,
                 addons TEXT,
-                addons_total NUMERIC(10,2),
-                line_total NUMERIC(10,2),
                 payment_method TEXT,
-                time_of_order TEXT
+                cash REAL,
+                change REAL,
+                table_no TEXT
             )
         """)
 
@@ -66,9 +65,9 @@ def init_db():
                 item_name TEXT UNIQUE,
                 category TEXT,
                 unit TEXT,
-                current_stock INTEGER,
-                reorder_level INTEGER,
-                reorder_qty INTEGER,
+                current_stock REAL,
+                reorder_level REAL,
+                reorder_qty REAL,
                 status TEXT,
                 supplier TEXT
             )
@@ -98,20 +97,20 @@ def init_db():
     else:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS sales (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 order_id INTEGER,
-                order_line_id INTEGER,
-                datetime TEXT,
-                item_id TEXT,
+                timestamp TEXT,
                 item_name TEXT,
                 category TEXT,
                 size TEXT,
                 qty INTEGER,
                 unit_price REAL,
-                addons TEXT,
-                addons_total REAL,
                 line_total REAL,
+                addons TEXT,
                 payment_method TEXT,
-                time_of_order TEXT
+                cash REAL,
+                change REAL,
+                table_no TEXT
             )
         """)
 
@@ -121,9 +120,9 @@ def init_db():
                 item_name TEXT UNIQUE,
                 category TEXT,
                 unit TEXT,
-                current_stock INTEGER,
-                reorder_level INTEGER,
-                reorder_qty INTEGER,
+                current_stock REAL,
+                reorder_level REAL,
+                reorder_qty REAL,
                 status TEXT,
                 supplier TEXT
             )

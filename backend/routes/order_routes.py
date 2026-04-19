@@ -5,6 +5,7 @@ import csv
 
 from db import get_db_connection, is_postgres
 
+
 order_bp = Blueprint("orders", __name__)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -241,14 +242,14 @@ def get_orders():
         if is_postgres():
             cursor.execute("""
                 SELECT order_id, timestamp, item_name, category, size, qty,
-                       unit_price, line_total, addons
+                       unit_price, line_total, addons, payment_method, cash, change, table_no
                 FROM public.sales
                 ORDER BY order_id DESC, timestamp DESC
             """)
         else:
             cursor.execute("""
                 SELECT order_id, timestamp, item_name, category, size, qty,
-                       unit_price, line_total, addons
+                       unit_price, line_total, addons, payment_method, cash, change, table_no
                 FROM sales
                 ORDER BY order_id DESC, timestamp DESC
             """)
@@ -287,7 +288,7 @@ def create_order():
         if not items:
             return jsonify({"success": False, "error": "No items in order"}), 400
 
-        if cash < total:
+        if payment_method.lower() == "cash" and cash < total:
             return jsonify({"success": False, "error": "Insufficient cash"}), 400
 
         conn = get_db_connection()
@@ -342,7 +343,6 @@ def create_order():
             lines_written += 1
 
             recipe_rows = get_base_recipe_rows(name, size)
-
             if not recipe_rows:
                 inventory_warnings.append(
                     f"No base recipe found for item='{name}' size='{size}'. Sale saved, but base ingredients were not deducted."
@@ -367,7 +367,6 @@ def create_order():
                     continue
 
                 addon_recipe_rows = get_addon_recipe_rows(addon_name)
-
                 if not addon_recipe_rows:
                     inventory_warnings.append(
                         f"No addon recipe found for addon='{addon_name}'"
@@ -433,7 +432,7 @@ def create_order():
             "change": change,
             "lines_written": lines_written,
             "deducted_ingredients": deducted_ingredients,
-            "inventory_warnings": inventory_warnings,
+            "inventory_warnings": inventory_warnings
         }), 201
 
     except Exception as e:

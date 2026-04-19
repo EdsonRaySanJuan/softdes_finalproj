@@ -6,6 +6,7 @@ import sqlite3
 from flask import Blueprint, jsonify, request, Response
 from db import get_db_connection, is_postgres
 
+
 inventory_bp = Blueprint("inventory", __name__)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -206,9 +207,9 @@ def add_item():
         item_name = str(data.get("item_name", "")).strip()
         category = str(data.get("category", "")).strip()
         unit = str(data.get("unit", "pcs")).strip()
-        current_stock = int(data.get("current_stock", 0))
-        reorder_level = int(data.get("reorder_level", 10))
-        reorder_qty = int(data.get("reorder_qty", 0))
+        current_stock = float(data.get("current_stock", 0) or 0)
+        reorder_level = float(data.get("reorder_level", 10) or 10)
+        reorder_qty = float(data.get("reorder_qty", 0) or 0)
         supplier = str(data.get("supplier", "N/A")).strip()
 
         if not item_name or not category:
@@ -283,9 +284,9 @@ def update_item(item_id):
         new_name = str(data.get("item_name", item["item_name"])).strip()
         new_cat = str(data.get("category", item["category"])).strip()
         new_unit = str(data.get("unit", item["unit"])).strip()
-        new_stock = int(data.get("current_stock", item["current_stock"]))
-        new_reorder_lvl = int(data.get("reorder_level", item["reorder_level"]))
-        new_reorder_qty = int(data.get("reorder_qty", item.get("reorder_qty", 0)))
+        new_stock = float(data.get("current_stock", item["current_stock"]))
+        new_reorder_lvl = float(data.get("reorder_level", item["reorder_level"]))
+        new_reorder_qty = float(data.get("reorder_qty", item.get("reorder_qty", 0)))
         new_supplier = str(data.get("supplier", item["supplier"])).strip()
 
         status = compute_status(new_stock, new_reorder_lvl)
@@ -410,11 +411,8 @@ def get_reorder_list():
             "success": False,
             "error": str(e)
         }), 500
-    
 
-# ===============================
-# 🔥 ADDED: FIXED SEED INVENTORY
-# ===============================
+
 @inventory_bp.route("/debug/seed-inventory", methods=["GET"])
 def seed_inventory():
     try:
@@ -441,16 +439,11 @@ def seed_inventory():
                 continue
 
             unit = str(row.get("unit", "pcs")).strip()
-
-            # 🔥 MAIN FIX: use stocks column
-            current_stock = int(float(row.get("stocks", 1000)))
-
-            reorder_level = int(current_stock * 0.2)
-            reorder_qty = int(current_stock * 0.3)
-
+            current_stock = float(row.get("stocks", 1000) or 1000)
+            reorder_level = max(current_stock * 0.2, 1)
+            reorder_qty = max(current_stock * 0.3, 1)
             category = "general"
             supplier = "auto"
-
             status = compute_status(current_stock, reorder_level)
 
             if is_postgres():
@@ -465,11 +458,13 @@ def seed_inventory():
                         current_stock = EXCLUDED.current_stock,
                         reorder_level = EXCLUDED.reorder_level,
                         reorder_qty = EXCLUDED.reorder_qty,
-                        status = EXCLUDED.status
+                        status = EXCLUDED.status,
+                        unit = EXCLUDED.unit,
+                        category = EXCLUDED.category,
+                        supplier = EXCLUDED.supplier
                 """, (
-                    item_name, category, unit,
-                    current_stock, reorder_level,
-                    reorder_qty, status, supplier
+                    item_name, category, unit, current_stock,
+                    reorder_level, reorder_qty, status, supplier
                 ))
             else:
                 cursor.execute("""
@@ -479,97 +474,8 @@ def seed_inventory():
                     )
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    item_name, category, unit,
-                    current_stock, reorder_level,
-                    reorder_qty, status, supplier
-                ))
-
-            processed += 1
-
-        conn.commit()
-        conn.close()
-
-        return jsonify({
-            "success": True,
-            "message": "Inventory seeded successfully",
-            "processed": processed
-        }), 200
-
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
-    try:
-        addon_path = os.path.join(DATA_DIR, "addon_recipes.csv")
-
-        if not os.path.exists(addon_path):
-            return jsonify({
-                "success": False,
-                "error": f"CSV not found at {addon_path}"
-            }), 404
-
-        import pandas as pd
-        df = pd.read_csv(addon_path)
-
-        # ✅ FIX: use correct columns
-        df = df.dropna(subset=["ingredient_name", "stocks"])
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        processed = 0
-
-        for _, row in df.iterrows():
-            item_name = str(row["ingredient_name"]).strip()
-            unit = str(row.get("unit", "pcs")).strip()
-
-            # 🔥 MAIN FIX
-            current_stock = int(float(row["stocks"]))
-
-            reorder_level = int(current_stock * 0.2)
-            reorder_qty = int(current_stock * 0.3)
-
-            category = "general"
-            supplier = "auto"
-
-            status = "Normal"
-            if current_stock <= 0:
-                status = "Out of Stock"
-            elif current_stock <= (reorder_level * 0.25):
-                status = "Critical"
-            elif current_stock <= reorder_level:
-                status = "Low"
-
-            if is_postgres():
-                cursor.execute("""
-                    INSERT INTO inventory (
-                        item_name, category, unit, current_stock,
-                        reorder_level, reorder_qty, status, supplier
-                    )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (item_name)
-                    DO UPDATE SET
-                        current_stock = EXCLUDED.current_stock,
-                        reorder_level = EXCLUDED.reorder_level,
-                        reorder_qty = EXCLUDED.reorder_qty,
-                        status = EXCLUDED.status
-                """, (
-                    item_name, category, unit,
-                    current_stock, reorder_level,
-                    reorder_qty, status, supplier
-                ))
-            else:
-                cursor.execute("""
-                    INSERT OR REPLACE INTO inventory (
-                        item_name, category, unit, current_stock,
-                        reorder_level, reorder_qty, status, supplier
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    item_name, category, unit,
-                    current_stock, reorder_level,
-                    reorder_qty, status, supplier
+                    item_name, category, unit, current_stock,
+                    reorder_level, reorder_qty, status, supplier
                 ))
 
             processed += 1

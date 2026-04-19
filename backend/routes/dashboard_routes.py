@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, request
 from datetime import timedelta, datetime
 from db import get_db_connection, is_postgres
 
-dashboard_bp = Blueprint('dashboard', __name__)
+
+dashboard_bp = Blueprint("dashboard", __name__)
 
 
 def dict_rows(rows):
@@ -19,6 +20,9 @@ def dict_rows(rows):
 def get_stats():
     try:
         range_days = int(request.args.get("range", 1))
+        if range_days < 1:
+            range_days = 1
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -32,7 +36,7 @@ def get_stats():
                     COALESCE(COUNT(DISTINCT order_id), 0) AS total_orders,
                     COALESCE(SUM(qty), 0) AS items_sold
                 FROM sales
-                WHERE DATE(datetime) >= %s
+                WHERE DATE(timestamp) >= %s
             """, (start_date,))
         else:
             cursor.execute("""
@@ -41,7 +45,7 @@ def get_stats():
                     COALESCE(COUNT(DISTINCT order_id), 0) AS total_orders,
                     COALESCE(SUM(qty), 0) AS items_sold
                 FROM sales
-                WHERE DATE(datetime) >= ?
+                WHERE DATE(timestamp) >= ?
             """, (str(start_date),))
 
         stats = cursor.fetchone()
@@ -49,18 +53,18 @@ def get_stats():
 
         if is_postgres():
             cursor.execute("""
-                SELECT datetime, order_id, item_name, qty, line_total, payment_method
+                SELECT timestamp, order_id, item_name, qty, line_total, payment_method
                 FROM sales
-                WHERE DATE(datetime) >= %s
-                ORDER BY datetime DESC
+                WHERE DATE(timestamp) >= %s
+                ORDER BY timestamp DESC
                 LIMIT 5
             """, (start_date,))
         else:
             cursor.execute("""
-                SELECT datetime, order_id, item_name, qty, line_total, payment_method
+                SELECT timestamp, order_id, item_name, qty, line_total, payment_method
                 FROM sales
-                WHERE DATE(datetime) >= ?
-                ORDER BY datetime DESC
+                WHERE DATE(timestamp) >= ?
+                ORDER BY timestamp DESC
                 LIMIT 5
             """, (str(start_date),))
 
@@ -70,12 +74,12 @@ def get_stats():
         recent_list = []
         for row in recent:
             recent_list.append({
-                "datetime": str(row["datetime"])[:16],
-                "order_id": int(row["order_id"]) if row["order_id"] is not None else 0,
-                "item_name": row["item_name"],
-                "qty": int(row["qty"]),
-                "line_total": float(row["line_total"]),
-                "payment_method": row["payment_method"]
+                "timestamp": str(row["timestamp"])[:16] if row.get("timestamp") else "",
+                "order_id": int(row["order_id"]) if row.get("order_id") is not None else 0,
+                "item_name": row.get("item_name", ""),
+                "qty": int(row["qty"] or 0),
+                "line_total": float(row["line_total"] or 0),
+                "payment_method": row.get("payment_method", "")
             })
 
         return jsonify({
@@ -84,8 +88,8 @@ def get_stats():
             "items_sold": int(stats["items_sold"] or 0),
             "alerts": 0,
             "recent_orders": recent_list
-        })
+        }), 200
 
     except Exception as e:
         print(f"Dashboard Error: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e)}), 500
