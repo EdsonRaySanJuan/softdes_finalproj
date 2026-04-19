@@ -1,4 +1,5 @@
 import os
+import csv
 import pandas as pd
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -12,14 +13,21 @@ from routes.auth_routes import auth_bp
 from routes.user_routes import user_bp
 from routes.rpa_routes import rpa_bp
 
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+DRINK_RECIPES_PATH = os.path.join(DATA_DIR, "drink_recipes.csv")
+ADDON_RECIPES_PATH = os.path.join(DATA_DIR, "addon_recipes.csv")
 
 ALLOWED_ORIGINS = [
     "https://softdes-finalproj.vercel.app",
     "http://localhost:3000",
     "http://localhost:5173",
 ]
+
 
 def is_allowed_origin(origin):
     if not origin:
@@ -33,6 +41,7 @@ def is_allowed_origin(origin):
 
     return False
 
+
 @app.after_request
 def add_cors_headers(response):
     origin = request.headers.get("Origin")
@@ -44,6 +53,7 @@ def add_cors_headers(response):
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
 
     return response
+
 
 @app.before_request
 def handle_preflight():
@@ -59,13 +69,94 @@ def handle_preflight():
 
         return response, 200
 
+
 CORS(
     app,
     resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
     supports_credentials=True
 )
 
+
+def ensure_sales_table():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if is_postgres():
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS sales (
+                id SERIAL PRIMARY KEY,
+                order_id INTEGER NOT NULL,
+                timestamp TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                category TEXT,
+                size TEXT,
+                qty INTEGER NOT NULL,
+                unit_price REAL NOT NULL,
+                line_total REAL NOT NULL,
+                addons TEXT,
+                payment_method TEXT,
+                cash REAL,
+                change REAL,
+                table_no TEXT
+            )
+        """)
+    else:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS sales (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_id INTEGER NOT NULL,
+                timestamp TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                category TEXT,
+                size TEXT,
+                qty INTEGER NOT NULL,
+                unit_price REAL NOT NULL,
+                line_total REAL NOT NULL,
+                addons TEXT,
+                payment_method TEXT,
+                cash REAL,
+                change REAL,
+                table_no TEXT
+            )
+        """)
+
+    conn.commit()
+    conn.close()
+
+
+def ensure_recipe_csv_placeholders():
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    if not os.path.exists(DRINK_RECIPES_PATH):
+        with open(DRINK_RECIPES_PATH, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "menu_category",
+                "menu_item",
+                "size",
+                "ingredient_name",
+                "qty_used",
+                "unit",
+                "recipe_type",
+                "notes",
+            ])
+
+    if not os.path.exists(ADDON_RECIPES_PATH):
+        with open(ADDON_RECIPES_PATH, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "addon_name",
+                "ingredient_name",
+                "qty_used",
+                "unit",
+                "notes",
+            ])
+
+
 init_db()
+ensure_sales_table()
+ensure_recipe_csv_placeholders()
+
 
 @app.route("/api/debug/db-check", methods=["GET"])
 def debug_db_check():
@@ -92,6 +183,46 @@ def debug_db_check():
             "using_postgres": is_postgres(),
             "error": str(e)
         }), 500
+
+
+@app.route("/api/debug/tables", methods=["GET"])
+def debug_tables():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        if is_postgres():
+            cursor.execute("""
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                ORDER BY table_name
+            """)
+            rows = cursor.fetchall()
+            tables = [row["table_name"] if isinstance(row, dict) else row[0] for row in rows]
+        else:
+            cursor.execute("""
+                SELECT name
+                FROM sqlite_master
+                WHERE type = 'table'
+                ORDER BY name
+            """)
+            rows = cursor.fetchall()
+            tables = [row["name"] if isinstance(row, dict) else row[0] for row in rows]
+
+        conn.close()
+
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "tables": tables
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "using_postgres": is_postgres(),
+            "error": str(e)
+        }), 500
+
 
 @app.route("/api/debug/seed-admin", methods=["GET"])
 def seed_admin():
@@ -144,6 +275,7 @@ def seed_admin():
             "error": str(e)
         }), 500
 
+
 @app.route("/api/debug/inventory", methods=["GET"])
 def debug_inventory():
     try:
@@ -175,11 +307,11 @@ def debug_inventory():
             "error": str(e)
         }), 500
 
+
 @app.route("/api/debug/seed-inventory", methods=["GET"])
 def seed_inventory():
     try:
-        base_dir = os.path.abspath(os.path.dirname(__file__))
-        csv_path = os.path.join(base_dir, "cafe_ingredients_inventory.csv")
+        csv_path = os.path.join(BASE_DIR, "cafe_ingredients_inventory.csv")
 
         if not os.path.exists(csv_path):
             return jsonify({
@@ -279,6 +411,7 @@ def seed_inventory():
             "error": str(e)
         }), 500
 
+
 app.register_blueprint(report_bp, url_prefix="/api/reports")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(order_bp, url_prefix="/api/orders")
@@ -287,13 +420,16 @@ app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(user_bp, url_prefix="/api/users")
 app.register_blueprint(rpa_bp, url_prefix="/api/rpa")
 
+
 @app.route("/")
 def home():
     return {"message": "Cafe POS Backend is running", "status": "online"}
 
+
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"ok": True}), 200
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
