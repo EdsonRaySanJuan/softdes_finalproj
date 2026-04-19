@@ -189,6 +189,30 @@ def deduct_inventory_ingredient(cursor, ingredient_name, qty_needed, inventory_w
             WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))
         """, (ingredient_name,))
 
+# Added
+def check_ingredient_stock(cursor, ingredient_name, qty_needed):
+    if is_postgres():
+        cursor.execute("""
+            SELECT current_stock
+            FROM inventory
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(%s))
+        """, (ingredient_name,))
+    else:
+        cursor.execute("""
+            SELECT current_stock
+            FROM inventory
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))
+        """, (ingredient_name,))
+
+    row = cursor.fetchone()
+
+    if not row:
+        return False, 0  # ingredient not found
+
+    stock = row["current_stock"] if isinstance(row, dict) else row[0]
+
+    return stock >= qty_needed, stock
+# End of added function
 
 @order_bp.route("/debug-db", methods=["GET"])
 def debug_orders_db():
@@ -269,6 +293,30 @@ def get_orders():
             "error": str(e)
         }), 500
 
+# Added
+def check_ingredient_stock(cursor, ingredient_name, qty_needed):
+    if is_postgres():
+        cursor.execute("""
+            SELECT current_stock
+            FROM inventory
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(%s))
+        """, (ingredient_name,))
+    else:
+        cursor.execute("""
+            SELECT current_stock
+            FROM inventory
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))
+        """, (ingredient_name,))
+
+    row = cursor.fetchone()
+
+    if not row:
+        return False, 0
+
+    stock = row["current_stock"] if isinstance(row, dict) else row[0]
+
+    return stock >= qty_needed, stock
+# End of added function
 
 @order_bp.route("/", methods=["POST"])
 def create_order():
@@ -353,6 +401,18 @@ def create_order():
                     qty_used = float(recipe.get("qty_used", 0) or 0) * qty
 
                     if ingredient_name and qty_used > 0:
+                        # 🔥 STOCK CHECK (NEW)
+                        ok, stock = check_ingredient_stock(cursor, ingredient_name, qty_used)
+
+                        if not ok:
+                            conn.rollback()
+                            conn.close()
+                            return jsonify({
+                                "success": False,
+                                "error": f"Not enough stock for '{ingredient_name}'. Available: {stock}, Needed: {qty_used}"
+                            }), 400
+
+                        # ✅ ORIGINAL (KEEP)
                         deduct_inventory_ingredient(
                             cursor,
                             ingredient_name,
@@ -378,6 +438,19 @@ def create_order():
                     qty_used = float(addon_recipe.get("qty_used", 0) or 0) * qty
 
                     if ingredient_name and qty_used > 0:
+
+                        # 🔥 STOCK CHECK (NEW)
+                        ok, stock = check_ingredient_stock(cursor, ingredient_name, qty_used)
+
+                        if not ok:
+                            conn.rollback()
+                            conn.close()
+                            return jsonify({
+                                "success": False,
+                                "error": f"Not enough stock for addon '{ingredient_name}'. Available: {stock}, Needed: {qty_used}"
+                            }), 400
+
+                        # ✅ ORIGINAL (KEEP)
                         deduct_inventory_ingredient(
                             cursor,
                             ingredient_name,
