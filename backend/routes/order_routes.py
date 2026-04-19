@@ -46,26 +46,67 @@ def get_base_recipe_rows(menu_item, size_label):
 
     rows = load_csv_rows(DRINK_RECIPES_PATH)
 
+    # ✅ 1. EXACT MATCH
     exact_matches = [
         row for row in rows
-        if normalize_text(str(row.get("menu_item", "")).strip()) == normalized_menu_item
-        and normalize_text(str(row.get("size", "")).strip()) == normalized_size
+        if normalize_text(row.get("menu_item")) == normalized_menu_item
+        and normalize_text(row.get("size")) == normalized_size
     ]
-
     if exact_matches:
         return exact_matches
 
+    # ✅ 2. PARTIAL MATCH (existing)
     fallback_matches = [
         row for row in rows
         if (
-            normalize_text(str(row.get("menu_item", "")).strip()).startswith(normalized_menu_item)
-            or normalized_menu_item.startswith(normalize_text(str(row.get("menu_item", "")).strip()))
+            normalize_text(row.get("menu_item")).startswith(normalized_menu_item)
+            or normalized_menu_item.startswith(normalize_text(row.get("menu_item")))
         )
-        and normalize_text(str(row.get("size", "")).strip()) == normalized_size
+        and normalize_text(row.get("size")) == normalized_size
     ]
+    if fallback_matches:
+        return fallback_matches
 
-    return fallback_matches
+    # 🔥 3. LEMONADE AUTO-FALLBACK (FIX YOUR ISSUE)
+    if "lemonade" in normalized_menu_item:
+        base_matches = [
+            row for row in rows
+            if normalize_text(row.get("menu_item")) in ["lemonade", "lemonade (regular)"]
+            and normalize_text(row.get("size")) == normalized_size
+        ]
 
+        # add flavor automatically
+        flavor_rows = []
+
+        if "strawberry" in normalized_menu_item:
+            flavor_rows.append({
+                "ingredient_name": "Strawberry Syrup",
+                "qty_used": 20
+            })
+        elif "blueberry" in normalized_menu_item or "blue" in normalized_menu_item:
+            flavor_rows.append({
+                "ingredient_name": "Blueberry Syrup",
+                "qty_used": 20
+            })
+        elif "peach" in normalized_menu_item:
+            flavor_rows.append({
+                "ingredient_name": "Sugar Syrup",
+                "qty_used": 20
+            })
+        elif "lychee" in normalized_menu_item:
+            flavor_rows.append({
+                "ingredient_name": "Sugar Syrup",
+                "qty_used": 20
+            })
+        elif "cucumber" in normalized_menu_item:
+            flavor_rows.append({
+                "ingredient_name": "Cucumber",
+                "qty_used": 50
+            })
+
+        return base_matches + flavor_rows
+
+    return []
 
 def get_addon_recipe_rows(addon_name):
     rows = load_csv_rows(ADDON_RECIPES_PATH)
@@ -149,7 +190,7 @@ def deduct_inventory_ingredient(cursor, ingredient_name, qty_needed, inventory_w
         cursor.execute("""
             UPDATE inventory
             SET current_stock = current_stock - %s
-            WHERE LOWER(item_name) LIKE LOWER(%s)
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(%s))
         """, (qty_needed, ingredient_name))
     else:
         cursor.execute("""
@@ -278,7 +319,7 @@ def check_ingredient_stock(cursor, ingredient_name, qty_needed):
         cursor.execute("""
             SELECT current_stock
             FROM inventory
-            WHERE LOWER(item_name) LIKE LOWER(%s)
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(%s))
         """, (ingredient_name,))
     else:
         cursor.execute("""
