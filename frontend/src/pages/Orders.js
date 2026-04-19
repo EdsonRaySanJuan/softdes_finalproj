@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import "../styles/orders.css";
-import  API_BASE_URL  from "../config";
+import { API_BASE_URL } from "../config";
 
 const menuData = {
   lemonade: {
@@ -209,10 +209,6 @@ export default function Orders() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentCategory = menuData[selectedCategory];
-
-  if (!currentCategory) {
-    return <div style={{ color: "white" }}>Loading menu...</div>;
-}
 
   const total = useMemo(() => {
     return cart.reduce((sum, item) => sum + item.line_total, 0);
