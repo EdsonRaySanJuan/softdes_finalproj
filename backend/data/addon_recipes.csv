@@ -1,17 +1,22 @@
-addon_name,ingredient_name,qty_used,unit,stocks
+addon_name,ingredient_name,qty_used,unit
 
-Yakult,Yakult,1,pc,1000
-Dutchmill,Dutchmill,1,pc,1000
-Nata,Nata de Coco,50,g,1000
-Chia Seeds,Chia Seeds,10,g,1000
-Premium Upgrade,Sugar Syrup,20,ml,1000
-Tea Bag,Black Tea Leaves,5,g,1000
-Salty Cream,Whipping Cream,40,ml,1000
-Cream Cheese,Cream Cheese,40,ml,1000
-Oreo,Oreo,20,g,1000
-Coffee Jelly,Coffee Jelly,50,g,1000
-Boba Pearl,Boba Pearls,50,g,1000
-Sugar Jelly,Sugar Jelly,50,g,1000
-Espresso Shot,Espresso Shot,1,shot,1000
-Milk,Milk,30,ml,1000
-Whip Cream,Whipping Cream,30,g,1000
+Yakult,Yakult,1,pc
+Dutchmill,Dutchmill,1,pc
+
+Nata,Nata de Coco,50,g
+Chia Seeds,Chia Seeds,10,g
+
+Salty Cream,Whipping Cream,40,ml
+Cream Cheese,Cream Cheese,40,ml
+
+Oreo,Oreo,20,g
+Coffee Jelly,Coffee Jelly,50,g
+Boba Pearl,Boba Pearls,50,g
+Sugar Jelly,Sugar Jelly,50,g
+
+Milk,Milk,30,ml
+Whip Cream,Whipping Cream,30,ml
+
+Espresso Shot,Espresso Shot,1,shot
+Premium Upgrade,Sugar Syrup,20,ml
+Tea Bag,Black Tea Leaves,5,g

@@ -1,10 +1,46 @@
 menu_category,menu_item,size,ingredient_name,qty_used,unit,recipe_type
 
-# ================= LEMONADE BASED =================
-Cucumber Lemonade,Cucumber Lemonade,regular,Water,170,ml,base
-Cucumber Lemonade,Cucumber Lemonade,regular,Ice,250,g,base
-Cucumber Lemonade,Cucumber Lemonade,regular,Sugar Syrup,20,ml,base
-Cucumber Lemonade,Cucumber Lemonade,regular,Cucumber,50,g,base
+# ================= BASE FORMULAS =================
+
+# LEMONADE BASE (ALL FLAVORS USE THIS PATTERN)
+Lemonade Base,BASE_LEMONADE,regular,Water,170,ml,base
+Lemonade Base,BASE_LEMONADE,regular,Ice,250,g,base
+Lemonade Base,BASE_LEMONADE,regular,Sugar Syrup,20,ml,base
+
+# YOGURT BASE
+Yogurt Base,BASE_YOGURT,grande,Milk,120,ml,base
+Yogurt Base,BASE_YOGURT,grande,Ice,180,g,base
+
+Yogurt Base,BASE_YOGURT,venti,Milk,170,ml,base
+Yogurt Base,BASE_YOGURT,venti,Ice,250,g,base
+
+# MILK TEA BASE
+Milk Tea Base,BASE_MILKTEA,grande,Water,100,ml,base
+Milk Tea Base,BASE_MILKTEA,grande,Black Tea Leaves,5,g,base
+Milk Tea Base,BASE_MILKTEA,grande,Milk,60,ml,base
+
+Milk Tea Base,BASE_MILKTEA,venti,Water,140,ml,base
+Milk Tea Base,BASE_MILKTEA,venti,Black Tea Leaves,7,g,base
+Milk Tea Base,BASE_MILKTEA,venti,Milk,85,ml,base
+
+# FRAPPE BASE
+Frappe Base,BASE_FRAPPE,grande,Milk,100,ml,base
+Frappe Base,BASE_FRAPPE,grande,Ice,220,g,base
+Frappe Base,BASE_FRAPPE,grande,Sugar Syrup,20,ml,base
+
+Frappe Base,BASE_FRAPPE,venti,Milk,140,ml,base
+Frappe Base,BASE_FRAPPE,venti,Ice,300,g,base
+Frappe Base,BASE_FRAPPE,venti,Sugar Syrup,30,ml,base
+
+
+# ================= LEMONADE =================
+Lemonade,Lemonade,regular,Water,170,ml,base
+Lemonade,Lemonade,regular,Ice,250,g,base
+Lemonade,Lemonade,regular,Sugar Syrup,20,ml,base
+
+Green Apple Lemonade,Green Apple Lemonade,regular,Water,170,ml,base
+Green Apple Lemonade,Green Apple Lemonade,regular,Ice,250,g,base
+Green Apple Lemonade,Green Apple Lemonade,regular,Sugar Syrup,20,ml,base
 
 Strawberry Lemonade,Strawberry Lemonade,regular,Water,170,ml,base
 Strawberry Lemonade,Strawberry Lemonade,regular,Ice,250,g,base
@@ -13,6 +49,19 @@ Strawberry Lemonade,Strawberry Lemonade,regular,Strawberry Syrup,20,ml,base
 Blueberry Lemonade,Blueberry Lemonade,regular,Water,170,ml,base
 Blueberry Lemonade,Blueberry Lemonade,regular,Ice,250,g,base
 Blueberry Lemonade,Blueberry Lemonade,regular,Blueberry Syrup,20,ml,base
+
+Peach Lemonade,Peach Lemonade,regular,Water,170,ml,base
+Peach Lemonade,Peach Lemonade,regular,Ice,250,g,base
+Peach Lemonade,Peach Lemonade,regular,Sugar Syrup,20,ml,base
+
+Lychee Lemonade,Lychee Lemonade,regular,Water,170,ml,base
+Lychee Lemonade,Lychee Lemonade,regular,Ice,250,g,base
+Lychee Lemonade,Lychee Lemonade,regular,Sugar Syrup,20,ml,base
+
+Cucumber Lemonade,Cucumber Lemonade,regular,Water,170,ml,base
+Cucumber Lemonade,Cucumber Lemonade,regular,Ice,250,g,base
+Cucumber Lemonade,Cucumber Lemonade,regular,Cucumber,50,g,base
+
 
 # ================= YOGURT =================
 Strawberry,Strawberry,grande,Milk,120,ml,base
@@ -23,27 +72,39 @@ Strawberry,Strawberry,venti,Milk,170,ml,base
 Strawberry,Strawberry,venti,Ice,250,g,base
 Strawberry,Strawberry,venti,Strawberry Syrup,30,ml,base
 
-# ================= MILK TEA =================
-Matcha,Matcha,grande,Water,100,ml,base
-Matcha,Matcha,grande,Black Tea Leaves,5,g,base
-Matcha,Matcha,grande,Milk,60,ml,base
-Matcha,Matcha,grande,Matcha Powder,20,g,base
+Blueberry,Blueberry,grande,Milk,120,ml,base
+Blueberry,Blueberry,grande,Ice,180,g,base
+Blueberry,Blueberry,grande,Blueberry Syrup,20,ml,base
 
-Matcha,Matcha,venti,Water,140,ml,base
-Matcha,Matcha,venti,Black Tea Leaves,7,g,base
-Matcha,Matcha,venti,Milk,85,ml,base
+Blueberry,Blueberry,venti,Milk,170,ml,base
+Blueberry,Blueberry,venti,Ice,250,g,base
+Blueberry,Blueberry,venti,Blueberry Syrup,30,ml,base
+
+
+# ================= MILK TEA =================
+Matcha,Matcha,grande,Matcha Powder,20,g,base
 Matcha,Matcha,venti,Matcha Powder,28,g,base
 
-# ================= FRAPPE =================
-Caramel,Caramel,grande,Milk,100,ml,base
-Caramel,Caramel,grande,Ice,220,g,base
-Caramel,Caramel,grande,Sugar Syrup,20,ml,base
-Caramel,Caramel,grande,Caramel Syrup,20,ml,base
+Wintermelon,Wintermelon,grande,Sugar Syrup,25,ml,base
+Wintermelon,Wintermelon,venti,Sugar Syrup,35,ml,base
 
-Caramel,Caramel,venti,Milk,140,ml,base
-Caramel,Caramel,venti,Ice,300,g,base
-Caramel,Caramel,venti,Sugar Syrup,30,ml,base
+Oreo,Oreo,grande,Oreo,20,g,base
+Oreo,Oreo,venti,Oreo,30,g,base
+
+Dark Choco,Dark Choco,grande,Sugar Syrup,25,ml,base
+Dark Choco,Dark Choco,venti,Sugar Syrup,35,ml,base
+
+
+# ================= FRAPPUCCINO =================
+Caramel,Caramel,grande,Caramel Syrup,20,ml,base
 Caramel,Caramel,venti,Caramel Syrup,30,ml,base
+
+Dark Mocha,Dark Mocha,grande,Sugar Syrup,25,ml,base
+Dark Mocha,Dark Mocha,venti,Sugar Syrup,35,ml,base
+
+Coffee Jelly,Coffee Jelly,grande,Coffee Jelly,50,g,base
+Coffee Jelly,Coffee Jelly,venti,Coffee Jelly,70,g,base
+
 
 # ================= COFFEE =================
 Iced Latte,Iced Latte,grande,Espresso Shot,1,shot,base

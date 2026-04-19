@@ -2,20 +2,28 @@ item_name,category,unit,current_stock,reorder_level,reorder_qty
 
 Water,ambient,ml,100000,5000,10000
 Ice,frozen,g,50000,5000,10000
-Sugar Syrup,ambient,ml,15000,3000,500
-Strawberry Syrup,ambient,ml,5000,1000,300
-Blueberry Syrup,ambient,ml,5000,1000,300
-Caramel Syrup,ambient,ml,5000,1000,300
-Milk,general,ml,10000,2000,500
-Black Tea Leaves,dry,g,5000,1000,200
-Matcha Powder,dry,g,2000,500,100
-Espresso Shot,general,shot,1000,200,300
-Whipping Cream,cold,ml,5000,1200,300
-Coffee Jelly,general,g,1000,200,300
-Boba Pearls,ambient,g,4000,1000,300
-Chia Seeds,general,g,1000,200,300
-Nata de Coco,cold,g,3000,800,200
-Yakult,cold,pc,1000,200,300
-Dutchmill,general,pc,1000,200,300
-Oreo,general,g,1000,200,300
-Cucumber,ambient,g,3000,500,200
+Sugar Syrup,ambient,ml,15000,3000,5000
+Strawberry Syrup,ambient,ml,5000,1000,3000
+Blueberry Syrup,ambient,ml,5000,1000,3000
+Caramel Syrup,ambient,ml,5000,1000,3000
+
+Milk,general,ml,10000,2000,5000
+Black Tea Leaves,dry,g,5000,1000,2000
+Matcha Powder,dry,g,2000,500,1000
+Espresso Shot,general,shot,1000,200,500
+
+Whipping Cream,cold,ml,5000,1200,3000
+Coffee Jelly,general,g,1000,200,500
+Boba Pearls,ambient,g,4000,1000,2000
+Chia Seeds,general,g,1000,200,500
+Nata de Coco,cold,g,3000,800,1500
+
+Yakult,cold,pc,1000,200,500
+Dutchmill,cold,pc,1000,200,500
+
+Oreo,general,g,1000,200,500
+Cucumber,ambient,g,3000,500,1500
+
+# 🔥 ADDED (IMPORTANT — used in addons)
+Cream Cheese,cold,ml,2000,500,1000
+Sugar Jelly,general,g,2000,500,1000
