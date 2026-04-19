@@ -1,24 +1,17 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
-import sqlite3
 import os
 import csv
+
+from db import get_db_connection, is_postgres
 
 order_bp = Blueprint("orders", __name__)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 BACKEND_DIR = os.path.dirname(BASE_DIR)
 DATA_DIR = os.path.join(BACKEND_DIR, "data")
-DB_PATH = os.path.join(BACKEND_DIR, "cafe.db")
-SALES_CSV_PATH = os.path.join(DATA_DIR, "monthly_Sales.csv")
 DRINK_RECIPES_PATH = os.path.join(DATA_DIR, "drink_recipes.csv")
 ADDON_RECIPES_PATH = os.path.join(DATA_DIR, "addon_recipes.csv")
-
-
-def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 def normalize_text(value):
@@ -62,60 +55,88 @@ def get_addon_recipe_rows(addon_name):
     ]
 
 
-def ensure_sales_csv_exists():
-    os.makedirs(DATA_DIR, exist_ok=True)
+def ensure_sales_table_exists():
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    if not os.path.exists(SALES_CSV_PATH):
-        with open(SALES_CSV_PATH, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                "order_id",
-                "timestamp",
-                "item_name",
-                "category",
-                "size",
-                "qty",
-                "unit_price",
-                "line_total",
-                "addons",
-                "payment_method",
-                "cash",
-                "change",
-                "table_no",
-            ])
+    if is_postgres():
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS public.sales (
+                id SERIAL PRIMARY KEY,
+                order_id INTEGER NOT NULL,
+                timestamp TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                category TEXT,
+                size TEXT,
+                qty INTEGER NOT NULL,
+                unit_price REAL NOT NULL,
+                line_total REAL NOT NULL,
+                addons TEXT,
+                payment_method TEXT,
+                cash REAL,
+                change REAL,
+                table_no TEXT
+            )
+        """)
+    else:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS sales (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                order_id INTEGER NOT NULL,
+                timestamp TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                category TEXT,
+                size TEXT,
+                qty INTEGER NOT NULL,
+                unit_price REAL NOT NULL,
+                line_total REAL NOT NULL,
+                addons TEXT,
+                payment_method TEXT,
+                cash REAL,
+                change REAL,
+                table_no TEXT
+            )
+        """)
+
+    conn.commit()
+    conn.close()
 
 
-def append_sale_to_csv(order_id, timestamp, item_name, category, size, qty, unit_price, line_total, addons, payment_method, cash, change, table_no):
-    ensure_sales_csv_exists()
+def get_next_order_id(cursor):
+    if is_postgres():
+        cursor.execute("""
+            SELECT COALESCE(MAX(order_id), 0) + 1 AS next_id
+            FROM public.sales
+        """)
+    else:
+        cursor.execute("""
+            SELECT COALESCE(MAX(order_id), 0) + 1 AS next_id
+            FROM sales
+        """)
 
-    with open(SALES_CSV_PATH, "a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            order_id,
-            timestamp,
-            item_name,
-            category,
-            size,
-            qty,
-            unit_price,
-            line_total,
-            addons,
-            payment_method,
-            cash,
-            change,
-            table_no,
-        ])
+    row = cursor.fetchone()
+    if not row:
+        return 1
+
+    if isinstance(row, dict):
+        return int(row["next_id"])
+
+    return int(row["next_id"] if "next_id" in row.keys() else row[0])
 
 
 def deduct_inventory_ingredient(cursor, ingredient_name, qty_needed, inventory_warnings):
-    cursor.execute(
-        """
-        UPDATE inventory
-        SET current_stock = current_stock - ?
-        WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))
-        """,
-        (qty_needed, ingredient_name)
-    )
+    if is_postgres():
+        cursor.execute("""
+            UPDATE inventory
+            SET current_stock = current_stock - %s
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(%s))
+        """, (qty_needed, ingredient_name))
+    else:
+        cursor.execute("""
+            UPDATE inventory
+            SET current_stock = current_stock - ?
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))
+        """, (qty_needed, ingredient_name))
 
     if cursor.rowcount == 0:
         inventory_warnings.append(
@@ -123,78 +144,133 @@ def deduct_inventory_ingredient(cursor, ingredient_name, qty_needed, inventory_w
         )
         return
 
-    cursor.execute(
-        """
-        UPDATE inventory
-        SET status = CASE
-            WHEN current_stock <= 0 THEN 'Out of Stock'
-            WHEN current_stock <= (reorder_level * 0.25) THEN 'Critical'
-            WHEN current_stock <= reorder_level THEN 'Low'
-            ELSE 'Normal'
-        END
-        WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))
-        """,
-        (ingredient_name,)
-    )
+    if is_postgres():
+        cursor.execute("""
+            UPDATE inventory
+            SET status = CASE
+                WHEN current_stock <= 0 THEN 'Out of Stock'
+                WHEN current_stock <= (reorder_level * 0.25) THEN 'Critical'
+                WHEN current_stock <= reorder_level THEN 'Low'
+                ELSE 'Normal'
+            END
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(%s))
+        """, (ingredient_name,))
+    else:
+        cursor.execute("""
+            UPDATE inventory
+            SET status = CASE
+                WHEN current_stock <= 0 THEN 'Out of Stock'
+                WHEN current_stock <= (reorder_level * 0.25) THEN 'Critical'
+                WHEN current_stock <= reorder_level THEN 'Low'
+                ELSE 'Normal'
+            END
+            WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))
+        """, (ingredient_name,))
 
 
-def get_next_order_id(cursor):
-    cursor.execute("SELECT COALESCE(MAX(order_id), 0) + 1 AS next_id FROM sales")
-    row = cursor.fetchone()
-    return row["next_id"] if row else 1
+@order_bp.route("/debug-db", methods=["GET"])
+def debug_orders_db():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        if is_postgres():
+            cursor.execute("""
+                SELECT table_schema, table_name
+                FROM information_schema.tables
+                WHERE table_name = 'sales'
+                ORDER BY table_schema, table_name
+            """)
+        else:
+            cursor.execute("""
+                SELECT name
+                FROM sqlite_master
+                WHERE type = 'table' AND name = 'sales'
+            """)
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        result = []
+        for row in rows:
+            result.append(row if isinstance(row, dict) else dict(row))
+
+        return jsonify({
+            "success": True,
+            "using_postgres": is_postgres(),
+            "sales_table_lookup": result
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "using_postgres": is_postgres(),
+            "error": str(e)
+        }), 500
 
 
 @order_bp.route("/", methods=["GET"])
 def get_orders():
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    try:
+        ensure_sales_table_exists()
 
-    cursor.execute("""
-        SELECT order_id, timestamp, item_name, category, size, qty, unit_price, line_total, addons
-        FROM sales
-        ORDER BY order_id DESC, timestamp DESC
-    """)
-    rows = cursor.fetchall()
-    conn.close()
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    orders = []
-    for row in rows:
-        orders.append({
-            "order_id": row["order_id"],
-            "timestamp": row["timestamp"],
-            "item_name": row["item_name"],
-            "category": row["category"],
-            "size": row["size"],
-            "qty": row["qty"],
-            "unit_price": row["unit_price"],
-            "line_total": row["line_total"],
-            "addons": row["addons"],
-        })
+        if is_postgres():
+            cursor.execute("""
+                SELECT order_id, timestamp, item_name, category, size, qty,
+                       unit_price, line_total, addons
+                FROM public.sales
+                ORDER BY order_id DESC, timestamp DESC
+            """)
+        else:
+            cursor.execute("""
+                SELECT order_id, timestamp, item_name, category, size, qty,
+                       unit_price, line_total, addons
+                FROM sales
+                ORDER BY order_id DESC, timestamp DESC
+            """)
 
-    return jsonify(orders), 200
+        rows = cursor.fetchall()
+        conn.close()
+
+        result = []
+        for row in rows:
+            result.append(row if isinstance(row, dict) else dict(row))
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 
 @order_bp.route("/", methods=["POST"])
 def create_order():
-    data = request.get_json(silent=True) or {}
-
-    items = data.get("items", [])
-    total = float(data.get("total", 0) or 0)
-    cash = float(data.get("cash", 0) or 0)
-    change = float(data.get("change", 0) or 0)
-    table_no = str(data.get("table", "Walk-in")).strip()
-    payment_method = str(data.get("payment_method", "Cash")).strip()
-
-    if not items:
-        return jsonify({"success": False, "error": "No items in order"}), 400
-
-    if cash < total:
-        return jsonify({"success": False, "error": "Insufficient cash"}), 400
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
     try:
+        ensure_sales_table_exists()
+
+        data = request.get_json(silent=True) or {}
+
+        items = data.get("items", [])
+        total = float(data.get("total", 0) or 0)
+        cash = float(data.get("cash", 0) or 0)
+        change = float(data.get("change", 0) or 0)
+        table_no = str(data.get("table", "Walk-in")).strip()
+        payment_method = str(data.get("payment_method", "Cash")).strip()
+
+        if not items:
+            return jsonify({"success": False, "error": "No items in order"}), 400
+
+        if cash < total:
+            return jsonify({"success": False, "error": "Insufficient cash"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         order_id = get_next_order_id(cursor)
         inventory_warnings = []
@@ -217,21 +293,29 @@ def create_order():
                 [str(a.get("name", "")).strip() for a in addons_list if str(a.get("name", "")).strip()]
             ) or "None"
 
-            cursor.execute("""
-                INSERT INTO sales (
-                    order_id, timestamp, item_name, category, size, qty,
-                    unit_price, line_total, addons, payment_method, cash, change, table_no
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                order_id, timestamp, name, category, size, qty,
-                unit_price, line_total, addons_text, payment_method, cash, change, table_no
-            ))
+            if is_postgres():
+                cursor.execute("""
+                    INSERT INTO public.sales (
+                        order_id, timestamp, item_name, category, size, qty,
+                        unit_price, line_total, addons, payment_method, cash, change, table_no
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    order_id, timestamp, name, category, size, qty,
+                    unit_price, line_total, addons_text, payment_method, cash, change, table_no
+                ))
+            else:
+                cursor.execute("""
+                    INSERT INTO sales (
+                        order_id, timestamp, item_name, category, size, qty,
+                        unit_price, line_total, addons, payment_method, cash, change, table_no
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    order_id, timestamp, name, category, size, qty,
+                    unit_price, line_total, addons_text, payment_method, cash, change, table_no
+                ))
 
-            append_sale_to_csv(
-                order_id, timestamp, name, category, size, qty,
-                unit_price, line_total, addons_text, payment_method, cash, change, table_no
-            )
             lines_written += 1
 
             recipe_rows = get_base_recipe_rows(name, size)
@@ -268,28 +352,48 @@ def create_order():
                     if ingredient_name and qty_used > 0:
                         deduct_inventory_ingredient(cursor, ingredient_name, qty_used, inventory_warnings)
 
-        cursor.execute("""
-            SELECT item_name, current_stock, reorder_level
-            FROM inventory
-            WHERE current_stock <= reorder_level
-        """)
+        if is_postgres():
+            cursor.execute("""
+                SELECT item_name, current_stock, reorder_level
+                FROM inventory
+                WHERE current_stock <= reorder_level
+            """)
+        else:
+            cursor.execute("""
+                SELECT item_name, current_stock, reorder_level
+                FROM inventory
+                WHERE current_stock <= reorder_level
+            """)
+
         low_stock_items = cursor.fetchall()
 
         for low_item in low_stock_items:
-            item_name = low_item["item_name"]
-            current_stock = low_item["current_stock"]
-            reorder_level = low_item["reorder_level"]
+            row = low_item if isinstance(low_item, dict) else dict(low_item)
+            item_name = row["item_name"]
+            current_stock = row["current_stock"]
+            reorder_level = row["reorder_level"]
 
-            cursor.execute("""
-                INSERT INTO rpa_logs (timestamp, action, details)
-                VALUES (?, ?, ?)
-            """, (
-                timestamp,
-                "LOW_STOCK_ALERT",
-                f"{item_name} is low on stock ({current_stock} <= reorder level {reorder_level})"
-            ))
+            if is_postgres():
+                cursor.execute("""
+                    INSERT INTO rpa_logs (timestamp, action, details)
+                    VALUES (%s, %s, %s)
+                """, (
+                    timestamp,
+                    "LOW_STOCK_ALERT",
+                    f"{item_name} is low on stock ({current_stock} <= reorder level {reorder_level})"
+                ))
+            else:
+                cursor.execute("""
+                    INSERT INTO rpa_logs (timestamp, action, details)
+                    VALUES (?, ?, ?)
+                """, (
+                    timestamp,
+                    "LOW_STOCK_ALERT",
+                    f"{item_name} is low on stock ({current_stock} <= reorder level {reorder_level})"
+                ))
 
         conn.commit()
+        conn.close()
 
         return jsonify({
             "success": True,
@@ -303,11 +407,13 @@ def create_order():
         }), 201
 
     except Exception as e:
-        conn.rollback()
+        try:
+            conn.rollback()
+            conn.close()
+        except:
+            pass
+
         return jsonify({
             "success": False,
             "error": str(e)
         }), 500
-
-    finally:
-        conn.close()
