@@ -1,8 +1,8 @@
 import os
-import sqlite3
 from flask import Flask, jsonify
 from flask_cors import CORS
 
+from db import init_db
 from routes.report_routes import report_bp
 from routes.dashboard_routes import dashboard_bp
 from routes.order_routes import order_bp
@@ -12,6 +12,8 @@ from routes.user_routes import user_bp
 from routes.rpa_routes import rpa_bp
 
 app = Flask(__name__)
+
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 
 CORS(
     app,
@@ -29,75 +31,7 @@ CORS(
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 )
 
-
-def init_sqlite_db():
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    db_path = os.path.join(basedir, "data", "cafe.db")
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
-
-    conn = sqlite3.connect(db_path)
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS sales (
-            order_id INTEGER,
-            order_line_id INTEGER,
-            datetime TEXT,
-            item_id TEXT,
-            item_name TEXT,
-            category TEXT,
-            size TEXT,
-            qty INTEGER,
-            unit_price REAL,
-            addons TEXT,
-            addons_total REAL,
-            line_total REAL,
-            payment_method TEXT,
-            time_of_order TEXT
-        )
-    """)
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS inventory (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            item_name TEXT UNIQUE,
-            category TEXT,
-            unit TEXT,
-            current_stock INTEGER,
-            reorder_level INTEGER,
-            reorder_qty INTEGER,
-            status TEXT,
-            supplier TEXT
-        )
-    """)
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id TEXT PRIMARY KEY,
-            full_name TEXT,
-            username TEXT UNIQUE,
-            password TEXT,
-            role TEXT,
-            status TEXT,
-            last_login TEXT
-        )
-    """)
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS rpa_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp TEXT,
-            bot_name TEXT,
-            task_description TEXT,
-            status TEXT
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-    print("SQLite check complete.")
-
-
-init_sqlite_db()
+init_db()
 
 app.register_blueprint(report_bp, url_prefix="/api/reports")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
