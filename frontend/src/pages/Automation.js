@@ -36,10 +36,16 @@ function Automation() {
   const runBotNow = async () => {
     setIsRunningBot(true);
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout
+
       const res = await fetch(`${API_BASE_URL}/rpa/run-bot`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
       });
+
+      clearTimeout(timeout);
 
       const data = await res.json();
       console.log("RUN BOT RESPONSE:", data);
@@ -51,15 +57,19 @@ function Automation() {
       alert(data.message || "Bot executed successfully");
       fetchLogs();
     } catch (err) {
+      if (err.name === "AbortError") {
+        alert("Server is waking up. Please try again in 30 seconds.");
+      } else {
+        alert(`Bot run failed: ${err.message}`);
+      }
       console.error("Error running bot:", err);
-      alert(`Bot run failed: ${err.message}`);
     } finally {
       setIsRunningBot(false);
     }
   };
 
   useEffect(() => {
-    fetchLogs();
+    fetchLogs(); // warms up Render server on page load
     const interval = setInterval(fetchLogs, 10000);
     return () => clearInterval(interval);
   }, [fetchLogs]);
