@@ -2,7 +2,7 @@ import os
 import time
 import requests
 
-API_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:5000/api").rstrip("/")
+API_URL = os.getenv("API_BASE_URL", "https://softdes-finalproj.onrender.com/api").rstrip("/")
 BOT_NAME = os.getenv("RPA_BOT_NAME", "Inventory-Master-V1")
 SLEEP_SECONDS = int(os.getenv("RPA_INTERVAL_SECONDS", "60"))
 
