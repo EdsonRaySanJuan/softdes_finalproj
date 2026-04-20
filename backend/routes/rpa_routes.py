@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 from db import get_db_connection, is_postgres
-from rpa_agent import run_automation_cycle
+# from rpa_agent import run_automation_cycle   # temporarily disabled for testing
 
 rpa_bp = Blueprint("rpa", __name__)
 
@@ -35,29 +35,15 @@ def run_bot():
     if request.method == "OPTIONS":
         return jsonify({"success": True}), 200
 
-    try:
-        result = run_automation_cycle()
-
-        return jsonify({
-            "success": result.get("success", False),
-            "message": result.get("message", ""),
-            "bot_name": result.get("bot_name", "Unknown Bot"),
-            "checked_items": result.get("checked_items", 0),
-            "processed_items": result.get("processed_items", 0),
-            "logs_sent": result.get("logs_sent", 0),
-            "items": result.get("items", [])
-        }), 200 if result.get("success") else 500
-
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e),
-            "bot_name": "Unknown Bot",
-            "checked_items": 0,
-            "processed_items": 0,
-            "logs_sent": 0,
-            "items": []
-        }), 500
+    return jsonify({
+        "success": True,
+        "message": "Test route works",
+        "bot_name": "Test Bot",
+        "checked_items": 0,
+        "processed_items": 0,
+        "logs_sent": 0,
+        "items": []
+    }), 200
 
 
 @rpa_bp.route("/log", methods=["POST", "OPTIONS"])
