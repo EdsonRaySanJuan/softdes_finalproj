@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 from db import get_db_connection, is_postgres
-# from rpa_agent import run_automation_cycle   # temporarily disabled for testing
+from rpa_agent import run_automation_cycle
 
 rpa_bp = Blueprint("rpa", __name__)
 
@@ -35,15 +35,35 @@ def run_bot():
     if request.method == "OPTIONS":
         return jsonify({"success": True}), 200
 
-    return jsonify({
-        "success": True,
-        "message": "Test route works",
-        "bot_name": "Test Bot",
-        "checked_items": 0,
-        "processed_items": 0,
-        "logs_sent": 0,
-        "items": []
-    }), 200
+    try:
+        print("RUN BOT: route entered", flush=True)
+
+        result = run_automation_cycle()
+
+        print(f"RUN BOT: function returned: {result}", flush=True)
+
+        return jsonify({
+            "success": result.get("success", False),
+            "message": result.get("message", ""),
+            "bot_name": result.get("bot_name", "Unknown Bot"),
+            "checked_items": result.get("checked_items", 0),
+            "processed_items": result.get("processed_items", 0),
+            "logs_sent": result.get("logs_sent", 0),
+            "items": result.get("items", [])
+        }), 200 if result.get("success") else 500
+
+    except Exception as e:
+        print(f"RUN BOT ERROR: {e}", flush=True)
+
+        return jsonify({
+            "success": False,
+            "message": str(e),
+            "bot_name": "Unknown Bot",
+            "checked_items": 0,
+            "processed_items": 0,
+            "logs_sent": 0,
+            "items": []
+        }), 500
 
 
 @rpa_bp.route("/log", methods=["POST", "OPTIONS"])
