@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_cors import cross_origin
 from db import get_db_connection, is_postgres
 from rpa_agent import run_automation_cycle
@@ -36,11 +36,11 @@ def run_bot():
         return jsonify({"success": True}), 200
 
     try:
-        print("RUN BOT: route entered", flush=True)
+        current_app.logger.info("RUN BOT: route entered")
 
         result = run_automation_cycle()
 
-        print(f"RUN BOT: function returned: {result}", flush=True)
+        current_app.logger.info(f"RUN BOT: function returned: {result}")
 
         return jsonify({
             "success": result.get("success", False),
@@ -53,7 +53,7 @@ def run_bot():
         }), 200 if result.get("success") else 500
 
     except Exception as e:
-        print(f"RUN BOT ERROR: {e}", flush=True)
+        current_app.logger.exception(f"RUN BOT ERROR: {e}")
 
         return jsonify({
             "success": False,
@@ -106,6 +106,8 @@ def add_log():
         }), 201
 
     except Exception as e:
+        current_app.logger.exception(f"ADD LOG ERROR: {e}")
+
         if conn:
             try:
                 conn.rollback()
@@ -150,6 +152,8 @@ def get_logs():
         }), 200
 
     except Exception as e:
+        current_app.logger.exception(f"GET LOGS ERROR: {e}")
+
         return jsonify({
             "success": False,
             "error": str(e),
