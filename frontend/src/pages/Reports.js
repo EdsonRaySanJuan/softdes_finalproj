@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import "../styles/reports.css";
+import API_BASE_URL from "../config";
 
 import { Line } from "react-chartjs-2";
 import {
@@ -33,17 +34,16 @@ function Reports() {
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  
+
   const [isGenerating, setIsGenerating] = useState(false);
   const reportRef = useRef();
 
-  // --- AUTO-FETCHING ROUTES ---
   const fetchSummaryData = async (start, end) => {
     try {
-      const url = (start && end) 
-        ? `http://localhost:5000/api/reports/range?start=${start}&end=${end}`
-        : `http://localhost:5000/api/reports/range`;
-      
+      const url = (start && end)
+        ? `${API_BASE_URL}/reports/range?start=${start}&end=${end}`
+        : `${API_BASE_URL}/reports/range`;
+
       const res = await fetch(url);
       const data = await res.json();
       setReport(data);
@@ -54,9 +54,9 @@ function Reports() {
 
   const fetchChartData = async (range) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/reports/chart?range=${range}`);
+      const res = await fetch(`${API_BASE_URL}/reports/chart?range=${range}`);
       const data = await res.json();
-      setChartData(data);
+      setChartData(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Chart fetch error:", err);
     }
@@ -64,9 +64,9 @@ function Reports() {
 
   const fetchDailyTable = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/reports/daily");
+      const res = await fetch(`${API_BASE_URL}/reports/daily`);
       const data = await res.json();
-      setDailyData(data);
+      setDailyData(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Daily table fetch error:", err);
     }
@@ -100,7 +100,7 @@ function Reports() {
       past.setDate(today.getDate() - 30);
       start = past.toISOString().split("T")[0];
     } else {
-      return; 
+      return;
     }
 
     setStartDate(start);
@@ -118,7 +118,11 @@ function Reports() {
     setIsGenerating(true);
 
     try {
-      const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#051310" });
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#051310"
+      });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -137,14 +141,14 @@ function Reports() {
   const chartConfig = {
     labels: chartData.map((d) => d.date),
     datasets: [{
-        label: "Sales ₱",
-        data: chartData.map((d) => d.sales),
-        borderColor: "#19C37D",
-        backgroundColor: "rgba(25, 195, 125, 0.15)",
-        pointBackgroundColor: "#19C37D",
-        pointRadius: 4,
-        tension: 0.35,
-        fill: true
+      label: "Sales ₱",
+      data: chartData.map((d) => d.sales),
+      borderColor: "#19C37D",
+      backgroundColor: "rgba(25, 195, 125, 0.15)",
+      pointBackgroundColor: "#19C37D",
+      pointRadius: 4,
+      tension: 0.35,
+      fill: true
     }]
   };
 
@@ -169,16 +173,34 @@ function Reports() {
               <p className="page-subtitle">Generate summarized sales and order performance.</p>
             </div>
             <div className="topbar-right">
-              <select onChange={(e) => handlePreset(e.target.value)} defaultValue="Today" style={{ marginRight: '10px' }}>
+              <select
+                onChange={(e) => handlePreset(e.target.value)}
+                defaultValue="Today"
+                style={{ marginRight: '10px' }}
+              >
                 <option>Today</option>
                 <option>Last 7 Days</option>
                 <option>Last 30 Days</option>
                 <option>Custom</option>
               </select>
-              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={{ marginRight: '5px' }} />
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                style={{ marginRight: '5px' }}
+              />
               <span style={{ color: '#fff', marginRight: '5px' }}>to</span>
-              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={{ marginRight: '15px' }} />
-              <button className="btn-primary" onClick={handleDownloadPDF} disabled={isGenerating}>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                style={{ marginRight: '15px' }}
+              />
+              <button
+                className="btn-primary"
+                onClick={handleDownloadPDF}
+                disabled={isGenerating}
+              >
                 {isGenerating ? "Exporting..." : "Download PDF"}
               </button>
             </div>
@@ -188,7 +210,9 @@ function Reports() {
             <section className="kpi-grid">
               <div className="kpi-card">
                 <span className="kpi-label">Total Sales</span>
-                <span className="kpi-value" style={{ color: '#4ade80' }}>₱ {Number(report.total_sales).toFixed(2)}</span>
+                <span className="kpi-value" style={{ color: '#4ade80' }}>
+                  ₱ {Number(report.total_sales).toFixed(2)}
+                </span>
               </div>
               <div className="kpi-card">
                 <span className="kpi-label">Total Orders</span>
@@ -200,14 +224,19 @@ function Reports() {
               </div>
               <div className="kpi-card">
                 <span className="kpi-label">Top Category</span>
-                <span className="kpi-value" style={{ fontSize: '1.2em' }}>{report.top_category || "—"}</span>
+                <span className="kpi-value" style={{ fontSize: '1.2em' }}>
+                  {report.top_category || "—"}
+                </span>
               </div>
             </section>
 
             <section className="reports-panel">
               <div className="panel-header">
                 <h3>Sales Trend</h3>
-                <select value={chartRange} onChange={(e) => handleChartChange(e.target.value)}>
+                <select
+                  value={chartRange}
+                  onChange={(e) => handleChartChange(e.target.value)}
+                >
                   <option value="3">Last 3 Days</option>
                   <option value="7">Last 7 Days</option>
                   <option value="15">Last 15 Days</option>
@@ -217,7 +246,9 @@ function Reports() {
                 {chartData.length > 0 ? (
                   <Line data={chartConfig} options={chartOptions} />
                 ) : (
-                  <p style={{ color: "#A9B3AE", textAlign: "center", paddingTop: "50px" }}>Loading chart data...</p>
+                  <p style={{ color: "#A9B3AE", textAlign: "center", paddingTop: "50px" }}>
+                    No sales data available yet.
+                  </p>
                 )}
               </div>
             </section>
@@ -236,7 +267,11 @@ function Reports() {
                 </thead>
                 <tbody>
                   {dailyData.length === 0 ? (
-                    <tr><td colSpan="5" style={{ textAlign: "center" }}>No daily data available.</td></tr>
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: "center" }}>
+                        No daily data available.
+                      </td>
+                    </tr>
                   ) : (
                     dailyData.map((row, index) => (
                       <tr key={index}>
