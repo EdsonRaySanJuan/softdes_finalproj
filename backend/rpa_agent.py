@@ -1,13 +1,51 @@
 import os
 import time
 import requests
+from datetime import datetime
+
+from db import get_db_connection, is_postgres
+
 
 API_URL = os.getenv("API_BASE_URL", "https://softdes-finalproj.onrender.com/api").rstrip("/")
 BOT_NAME = os.getenv("RPA_BOT_NAME", "Inventory-Master-V1")
 SLEEP_SECONDS = int(os.getenv("RPA_INTERVAL_SECONDS", "60"))
 
 GET_TIMEOUT = (5, 45)
-POST_TIMEOUT = (5, 30)
+
+
+def save_log(bot_name, task_description, status):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        if is_postgres(conn):
+            cursor.execute("""
+                INSERT INTO rpa_logs (timestamp, bot_name, task_description, status)
+                VALUES (%s, %s, %s, %s)
+            """, (timestamp, bot_name, task_description, status))
+        else:
+            cursor.execute("""
+                INSERT INTO rpa_logs (timestamp, bot_name, task_description, status)
+                VALUES (?, ?, ?, ?)
+            """, (timestamp, bot_name, task_description, status))
+
+        conn.commit()
+        return True
+
+    except Exception as e:
+        print(f"save_log error: {e}", flush=True)
+        if conn:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+        return False
+
+    finally:
+        if conn:
+            conn.close()
 
 
 def run_automation_cycle():
@@ -49,19 +87,16 @@ def run_automation_cycle():
                 f"of {item_name}. Current stock: {current_stock}. Status: {status}."
             )
 
-            log_res = requests.post(
-                f"{API_URL}/rpa/log",
-                json={
-                    "bot_name": BOT_NAME,
-                    "task_description": task_msg,
-                    "status": "Completed"
-                },
-                timeout=POST_TIMEOUT
+            saved = save_log(
+                BOT_NAME,
+                task_msg,
+                "Completed"
             )
-            log_res.raise_for_status()
 
             results["processed_items"] += 1
-            results["logs_sent"] += 1
+            if saved:
+                results["logs_sent"] += 1
+
             results["items"].append({
                 "item_name": item_name,
                 "supplier": supplier,
