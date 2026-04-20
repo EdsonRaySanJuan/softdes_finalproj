@@ -27,13 +27,15 @@ CORS(
         r"/api/*": {
             "origins": [
                 "https://softdes-finalproj.vercel.app",
-                r"https://softdes-finalproj-.*\.vercel\.app",
+                "https://softdes-finalproj-98pf71sx2-edsonraysanjuans-projects.vercel.app",
                 "http://localhost:3000",
                 "http://localhost:5173",
-            ]
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
         }
     },
-    supports_credentials=True
+    supports_credentials=False
 )
 
 
