@@ -3,7 +3,7 @@ import os
 
 def check_db():
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(base_dir, "data", "cafe.db")
+    db_path = os.path.join(base_dir, "data", "cafe_new.db")
     
     if not os.path.exists(db_path):
         print("Database not found! Run app.py first.")

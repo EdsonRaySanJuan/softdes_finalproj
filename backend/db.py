@@ -18,7 +18,7 @@ def get_db_connection():
             print("⚠️ Postgres failed, fallback to SQLite:", e)
 
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    db_path = os.path.join(base_dir, "data", "cafe.db")
+    db_path = os.path.join(base_dir, "data", "cafe_new.db")
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
     conn = sqlite3.connect(db_path)
